@@ -82,7 +82,7 @@ jobs:
 
     - name: Build packages
       run: |
-        adduser -D -h /build -s /bin/bash build
+        adduser --disabled-password --home /build --shell /bin/bash build
         chown -R build:build /build ${PS3DEV}
         for f in ${{ matrix.packages }}; do
         chown -R build:build $f
