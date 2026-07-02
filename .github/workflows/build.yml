@@ -82,10 +82,10 @@ jobs:
 
     - name: Build packages
       run: |
-        adduser --disabled-password --home /build --shell /bin/bash build
-        chown -R build:build /build ${PS3DEV}
+        #adduser --disabled-password --home /build --shell /bin/bash build
+        #chown -R build:build /build ${PS3DEV}
         for f in ${{ matrix.packages }}; do
-        chown -R build:build $f
+        #chown -R build:build $f
         cd $f
         sudo -u build PATH=${PATH} PS3DEV=${PS3DEV} LIBMAKEPKG_LINT_PACKAGE_DOTFILES_SH=0 ${PS3DEV}/bin/ps3-makepkg --noconfirm --noprogressbar
         sudo -u build PATH=${PATH} PS3DEV=${PS3DEV} ${PS3DEV}/bin/ps3-pacman -U --noconfirm *.pkg.tar.gz --overwrite '*'
