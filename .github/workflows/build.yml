@@ -44,7 +44,7 @@ jobs:
 
     - name: Install Linux requirements
       run: |
-        sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev meson python3 ninja
+        sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev meson python3
 
     - uses: actions/checkout@v7
       with:
