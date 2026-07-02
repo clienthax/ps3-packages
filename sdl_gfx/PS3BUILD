@@ -1,0 +1,45 @@
+pkgname=sdl-gfx
+pkgver=2.0.22
+pkgrel=1
+pkgdesc="SDL graphics drawing primitives and other support functions"
+arch=(any)
+url="https://www.ferzkopp.net/wordpress/2016/01/02/sdl_gfx-sdl2_gfx/"
+license=('Zlib')
+groups=('ps3-libraries')
+depends=('sdl' 'freetype2')
+makedepends=()
+optdepends=()
+source=("http://www.ferzkopp.net/Software/SDL_gfx-2.0/SDL_gfx-${pkgver}.tar.gz")
+sha256sums=('1575e7be73fd927ff0e3567dc06095773f5ba1b47872b9aa0d0fefebfd6d2bf0')
+options=('!strip')
+
+prepare() {
+    cd "SDL_gfx-${pkgver}"
+#    patch -Np1 -i ../${pkgname}-${pkgver}-PPU.patch
+
+#    cd "${pkgname}"
+    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' SDL_gfx.pc.in
+    sed -i 's#@exec_prefix@#${prefix}#' SDL_gfx.pc.in
+    sed -i 's#@libdir@#${prefix}/lib#' SDL_gfx.pc.in
+    sed -i 's#@includedir@#${prefix}/include#' SDL_gfx.pc.in
+}
+
+build() {
+    cd "SDL_gfx-${pkgver}"
+    mkdir -p build-ppu
+    cd build-ppu
+
+    ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" \
+        --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+	--without-x \
+	--disable-sdltest \
+        || { exit 1; }
+
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "SDL_gfx-${pkgver}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

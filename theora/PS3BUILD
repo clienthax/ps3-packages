@@ -1,0 +1,44 @@
+pkgname=theora
+pkgver=1.2.0git
+pkgrel=1
+pkgdesc="Standard encoder and decoder library for the Theora video compression format"
+arch=(any)
+url="https://www.theora.org/"
+license=('BSD-3-Clause')
+groups=('ps3-libraries')
+# todo, prob has more, ogg vorbis etc..
+depends=('libogg')
+makedepends=()
+optdepends=()
+source=("git+https://gitlab.xiph.org/xiph/theora.git#commit=28fd5ec77f0ad0e07a371cef1047828116f6bd8a")
+sha256sums=('SKIP')
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}"
+
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+
+    ./autogen.sh
+}
+
+build() {
+    cd "${pkgname}"
+
+    mkdir -p build-ppu
+    cd build-ppu
+
+    CFLAGS="$(powerpc64-ps3-elf-pkg-config --cflags ogg)"
+    ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared --disable-examples
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

@@ -1,0 +1,52 @@
+pkgname=sdl-image
+pkgver=1.2.13
+pkgrel=1
+pkgdesc="A simple library to load images of various formats as SDL2 surfaces"
+arch=(any)
+url="https://www.libsdl.org/projects/old/SDL_image/release-1.2.html"
+license=('Zlib')
+groups=('ps3-libraries')
+# todo webp
+depends=('sdl' 'jpeg' 'libpng' 'libtiff')
+makedepends=()
+optdepends=()
+source=(
+    "git+https://github.com/libsdl-org/SDL_image.git#commit=822207ee09095b8f0a936f6f2d62e020f92a4c24"
+    "SDL_image-${pkgver}.patch"
+)
+sha256sums=(
+    "SKIP"
+    "SKIP"
+)
+options=('!strip')
+
+prepare() {
+    cd "SDL_image"
+    patch -Np0 -i ../SDL_image-${pkgver}.patch
+
+#    cd "${pkgname}"
+    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' SDL_*.pc.in
+    sed -i 's#@exec_prefix@#${prefix}#' SDL_*.pc.in
+    sed -i 's#@libdir@#${prefix}/lib#' SDL_*.pc.in
+    sed -i 's#@includedir@#${prefix}/include#' SDL_*.pc.in
+}
+
+build() {
+    cd "SDL_image"
+    mkdir -p build-ppu
+    cd build-ppu
+
+#    CFLAGS="$(powerpc64-ps3-elf-pkg-config --cflags freetype2)" \
+    ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" \
+        --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+	--disable-sdltest \
+        || { exit 1; }
+
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "SDL_image/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

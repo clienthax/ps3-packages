@@ -1,0 +1,61 @@
+pkgname=ffmpeg
+pkgver=8.1.2
+pkgrel=1
+pkgdesc="Complete and free Internet live audio and video broadcasting solution for Linux/Unix"
+arch=(any)
+url="https://ffmpeg.org/"
+license=('GPL')
+groups=('ps3-libraries')
+# todo, SO MANY..
+depends=('pthread-emb' 'bzip2' 'liblzma' 'sdl2' 'zlib')
+makedepends=()
+optdepends=()
+source=("git+https://github.com/FFmpeg/FFmpeg.git#commit=38b88335f99e76ed89ff3c93f877fdefce736c13")
+sha256sums=('SKIP')
+#options=('!strip')
+
+prepare() {
+    cd "FFmpeg"
+
+    sed -i \
+      -e 's#^prefix=\$prefix#prefix=\\${PS3DEV}/portlibs/ppu#' \
+      -e 's#^exec_prefix=\\${prefix}#exec_prefix=\\${prefix}#' \
+      -e 's#^libdir=\$libdir#libdir=\\${prefix}/lib#' \
+      -e 's#^includedir=\$incdir#includedir=\\${prefix}/include#' \
+      ffbuild/pkgconfig_generate.sh
+}
+
+build() {
+    cd "FFmpeg"
+
+    mkdir -p build-ppu
+    cd build-ppu
+
+  CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
+  LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2 -lcairo" \
+  PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
+  ../configure \
+  --prefix="/portlibs/ppu" \
+    --enable-cross-compile \
+    --cross-prefix="powerpc64-ps3-elf-" \
+    --arch=ppc64 \
+    --cpu=cell \
+    --target-os=none \
+    --disable-shared \
+    --enable-static \
+    --disable-encoders \
+    --disable-avfilter \
+    --disable-programs \
+    --disable-network \
+    --disable-doc \
+    --enable-pthreads \
+    --disable-runtime-cpudetect \
+    --extra-cflags="-Dstatic_assert=_Static_assert -std=gnu11"
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "FFmpeg/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

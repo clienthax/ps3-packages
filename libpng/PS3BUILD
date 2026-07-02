@@ -1,0 +1,39 @@
+pkgname=libpng
+pkgver=1.6.58
+pkgrel=2
+pkgdesc="libpng is the official PNG reference library"
+arch=(any)
+url="http://libpng.org/pub/png/libpng.html"
+license=('libpng-2.0')
+groups=('ps3-libraries')
+depends=('zlib')
+makedepends=()
+optdepends=()
+source=("https://github.com/pnggroup/libpng/archive/v${pkgver}.tar.gz")
+sha256sums=('a9d4df463d36a6e5f9c29bd6f4967312d17e996c1854f3511f833924eb1993cf')
+options=('!strip')
+
+prepare() {
+    cd "$pkgname-${pkgver}"
+    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' libpng-config.in libpng.pc.in
+    sed -i 's#@exec_prefix@#${prefix}#' libpng-config.in libpng.pc.in
+    sed -i 's#@libdir@#${prefix}/lib#' libpng-config.in libpng.pc.in
+    sed -i 's#@includedir@/libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@#${prefix}/include/libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@#' libpng-config.in libpng.pc.in
+}
+
+build() {
+    cd "$pkgname-${pkgver}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+        -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_TOOLS=OFF -DUNIX=ON -DPNG_POWERPC_VSX=off -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "$pkgname-${pkgver}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+
+    mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 ../LICENSE "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+}

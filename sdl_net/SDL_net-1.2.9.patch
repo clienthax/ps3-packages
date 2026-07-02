@@ -1,0 +1,37 @@
+diff --git a/configure.ac b/configure.ac
+index b7962d5..005196d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -94,6 +94,9 @@ case "$host" in
+     *-*-haiku*)
+         INETLIB="-lnetwork"
+         ;;
++    *-ps3-*)
++        INETLIB="-lnet -lsysmodule"
++        ;;
+     *)
+         INETLIB=""
+         ;;
+diff --git a/SDLnetsys.h b/SDLnetsys.h
+index 3c6fbd3..0818884 100644
+--- a/SDLnetsys.h
++++ b/SDLnetsys.h
+@@ -44,7 +44,9 @@
+ #ifdef __FreeBSD__
+ #include <sys/socket.h>
+ #endif
++#ifndef __lv2ppu__
+ #include <sys/ioctl.h>
++#endif
+ #include <sys/time.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+@@ -56,7 +58,7 @@
+ #include <netinet/tcp.h>
+ #endif
+ #include <sys/socket.h>
+-#ifndef __PSP__
++#if !defined(__PSP__) && !defined(__lv2ppu__)
+ #include <net/if.h>
+ #endif
+ #include <netdb.h>

@@ -1,0 +1,43 @@
+pkgname=freetype2
+pkgver=2.14.3
+pkgrel=1
+pkgdesc="A freely available software library to render fonts"
+arch=(any)
+url="https://www.freetype.org/"
+license=('FTL OR GPL-2.0-or-later')
+groups=('ps3-libraries')
+depends=('zlib' 'bzip2' 'libpng' 'brotli' 'harfbuzz')
+makedepends=()
+optdepends=()
+group=('all')
+source=("https://github.com/freetype/freetype/archive/VER-${pkgver//./-}.tar.gz")
+sha256sums=('dc49de6b01a266eef4876a4dd34d9842c475d3e28ff2eff63bd2fb760ab56261')
+options=('!strip')
+
+prepare() {
+    cd "freetype-VER-${pkgver//./-}/builds/unix"
+    sed -i 's#%prefix%#${PS3DEV}/portlibs/ppu#' freetype2.in
+    sed -i 's#%exec_prefix%#${prefix}#' freetype2.in
+    sed -i 's#%libdir%#${prefix}/lib#' freetype2.in
+    sed -i 's#%includedir%#${prefix}/include#' freetype2.in
+}
+
+build() {
+    cd "freetype-VER-${pkgver//./-}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "freetype-VER-${pkgver//./-}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+    cd ..
+
+    mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 LICENSE.TXT "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 docs/GPLv2.TXT "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 docs/FTL.TXT "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+}

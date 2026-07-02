@@ -1,0 +1,42 @@
+pkgname=lwip
+pkgver=2.2.1git
+pkgrel=1
+pkgdesc="LWIP"
+arch=(any)
+url="https://github.com/lwip-tcpip/lwip"
+license=('Custom')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+source=("git+https://github.com/lwip-tcpip/lwip#commit=3d896ba0a37ff3ce73270ca5e230707fe47f60e3")
+sha256sums=('SKIP')
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}"
+
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+}
+
+build() {
+    cd "${pkgname}"
+
+    mkdir -p build-ppu
+    cd build-ppu
+
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+        -DUNIX=ON \
+        -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

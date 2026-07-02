@@ -1,0 +1,49 @@
+pkgname=mbedtls
+pkgver=4.1.0
+pkgrel=1
+pkgdesc="Secure Socket Layer library"
+arch=(any)
+url="https://www.trustedfirmware.org/projects/mbed-tls/"
+license=('Apache-2.0')
+groups=('ps3-libraries')
+depends=('pthread-emb')
+optdepends=()
+makedepends=()
+source=(
+    "git+https://github.com/Mbed-TLS/mbedtls.git#commit=0fe989b6b514192783c469039edd325fd0989806"
+    "${pkgname}-${pkgver}.patch"
+)
+sha256sums=(
+    "SKIP"
+    "SKIP"
+)
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}"
+    git submodule update --init --recursive
+
+    patch -Np1 -i ../${pkgname}-${pkgver}.patch
+
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+}
+
+build() {
+    cd "${pkgname}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+      -DENABLE_PROGRAMS=OFF \
+      -DENABLE_TESTING=OFF \
+      -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

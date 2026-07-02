@@ -1,0 +1,32 @@
+pkgname=brotli
+pkgver=1.2.0
+pkgrel=2
+pkgdesc="Brotli is a generic-purpose lossless compression algorithm"
+arch=(any)
+url="https://github.com/google/brotli"
+license=('MIT')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+source=("https://github.com/google/brotli/archive/v${pkgver}.tar.gz")
+sha256sums=('816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec')
+options=('!strip')
+
+build() {
+    cd "$pkgname-${pkgver}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DBROTLI_BUILD_TOOLS=OFF -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "$pkgname-${pkgver}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+
+    mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 ../LICENSE "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+}

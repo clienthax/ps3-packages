@@ -1,0 +1,40 @@
+pkgname=faad2
+pkgver=2.11.2
+pkgrel=1
+pkgdesc="FAAD2 is a HE, LC, MAIN and LTP profile, MPEG2 and MPEG-4 AAC decoder."
+arch=(any)
+url="https://github.com/knik0/faad2"
+license=('GPLv2')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+source=("https://github.com/knik0/faad2/archive/refs/tags/${pkgver}.tar.gz")
+sha256sums=('3fcbd305e4abd34768c62050e18ca0986f7d9c5eca343fb98275418013065c0e')
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}-${pkgver}"
+
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+}
+
+build() {
+    cd "${pkgname}-${pkgver}"
+    mkdir -p build-ppu
+    cd build-ppu
+
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}-${pkgver}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

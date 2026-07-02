@@ -1,0 +1,37 @@
+pkgname=sdl2
+pkgver=1
+pkgrel=1
+pkgdesc="A port of SDL 2 to the free PS3 SDK PSL1GHT"
+arch=(any)
+url="https://github.com/zeldin/SDL_PSL1GHT"
+license=('LGPL-2.1')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+source=("git+https://github.com/shagkur/SDL_PSL1GHT.git#commit=b81fbad4489918f5ed9c9c052238d7a25da9bab9")
+sha256sums=("SKIP")
+options=('!strip')
+
+prepare() {
+    cd "SDL_PSL1GHT"
+    find ./ -name "sdl2.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;
+}
+
+build() {
+    cd "SDL_PSL1GHT"
+    
+    ./script.sh
+}
+
+package() {
+    cd "SDL_PSL1GHT"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+    # lazy. - breaks if non default dir..
+    mv $pkgdir/usr/local/ps3dev/portlibs $pkgdir/.
+    rm -rf $pkgdir/usr
+}

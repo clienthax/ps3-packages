@@ -1,0 +1,53 @@
+pkgname=sdl-ttf
+pkgver=2.0.10
+pkgrel=1
+pkgdesc="A companion library to SDL for working with TrueType (tm) fonts"
+arch=(any)
+url="https://www.ferzkopp.net/wordpress/2016/01/02/sdl_gfx-sdl2_gfx/"
+license=('Zlib')
+groups=('ps3-libraries')
+depends=('sdl' 'freetype2' 'zlib' 'libpng')
+makedepends=()
+optdepends=()
+source=(
+    "http://www.libsdl.org/projects/SDL_ttf/release/SDL_ttf-${pkgver}.tar.gz"
+    "SDL_ttf-${pkgver}.patch"
+)
+sha256sums=(
+    '7d38704bcc7c34029c2dcb73b2d4857e8ad76341c6e0faed279eb9f743c66c6a'
+    "SKIP"
+)
+options=('!strip')
+
+prepare() {
+    cd "SDL_ttf-${pkgver}"
+    patch -Np1 -i ../SDL_ttf-${pkgver}.patch
+
+#    cd "${pkgname}"
+    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' SDL_*.pc.in
+    sed -i 's#@exec_prefix@#${prefix}#' SDL_*.pc.in
+    sed -i 's#@libdir@#${prefix}/lib#' SDL_*.pc.in
+    sed -i 's#@includedir@#${prefix}/include#' SDL_*.pc.in
+}
+
+build() {
+    cd "SDL_ttf-${pkgver}"
+    mkdir -p build-ppu
+    cd build-ppu
+
+    CFLAGS="$(powerpc64-ps3-elf-pkg-config --cflags freetype2)" \
+    ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" \
+	--with-freetype-exec-prefix="$PS3DEV/portlibs/ppu" \
+        --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+	--without-x \
+	--disable-sdltest \
+        || { exit 1; }
+
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "SDL_ttf-${pkgver}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

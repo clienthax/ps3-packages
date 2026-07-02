@@ -1,0 +1,48 @@
+pkgname=liblzma
+pkgver=5.8.3
+pkgrel=1
+pkgdesc="LZMA provides a general-purpose data-compression library"
+arch=(any)
+url="https://github.com/tukaani-project/xz/"
+license=('public domain')
+depends=()
+groups=('ps3-libraries')
+makedepends=()
+optdepends=()
+source=("https://github.com/tukaani-project/xz/releases/download/v${pkgver}/xz-${pkgver}.tar.bz2")
+sha256sums=("33bf69c0d6c698e83a68f77e6c1f465778e418ca0b3d59860d3ab446f4ac99a6")
+options=('!strip')
+
+prepare() {
+    cd "xz-${pkgver}"
+#    sed -i '93s/sysconf(_SC_NPROCESSORS_ONLN)/1/' src/common/tuklib_cpucores.c
+    sed -i '/if(NOT TUKLIB_CPUCORES_FOUND OR NOT TUKLIB_PHYSMEM_FOUND)/,/endif()/d' CMakeLists.txt
+    sed -i 's|#include <poll.h>|#include <net/poll.h>|g' src/xz/file_io.c
+    sed -i '/foreach(TEST IN LISTS LIBLZMA_TESTS)/,/endforeach()/s/^/# DISABLED: /' tests/tests.cmake
+
+    cd "src/${pkgname}"
+    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' liblzma.pc.in
+    sed -i 's#@exec_prefix@#${prefix}#' liblzma.pc.in
+    sed -i 's#@libdir@#${prefix}/lib#' liblzma.pc.in
+    sed -i 's#@includedir@#${prefix}/include#' liblzma.pc.in
+}
+
+build() {
+    cd "xz-${pkgver}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_EXAMPLES=OFF \
+          -DBUILD_TOOLS=OFF \
+          -DXZ_TOOL_XZ=OFF \
+          -DXZ_TOOL_XZDEC=OFF \
+          -DXZ_TOOL_LZMADEC=OFF \
+          -DXZ_TOOL_LZMAINFO=OFF \
+          -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "xz-${pkgver}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

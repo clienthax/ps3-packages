@@ -1,0 +1,51 @@
+pkgname=cairo
+pkgver=1.18.4
+pkgrel=1
+pkgdesc="Pixman is a low-level software library for pixel manipulation"
+arch=(any)
+url="https://cairographics.org/"
+# todo
+license=('custom') 
+groups=('ps3-libraries')
+depends=('pthread-emb' 'libpng' 'freetype2')
+makedepends=()
+optdepends=()
+group=('all')
+source=("https://github.com/sailfishos-mirror/cairo/archive/refs/tags/${pkgver}.tar.gz")
+sha256sums=('2f3e6e665dbbb420809102b71ad7d0f7ce870a0b1bf8b34c073f06aefb511fc6')
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}-${pkgver}"
+}
+
+build() {
+    cd "${pkgname}-${pkgver}"
+    mkdir -p build-ppu
+
+    # Todo fix mutex impl
+    meson setup --wipe build-ppu \
+      --cross-file $PS3DEV/etc/ps3-ppu-cross.txt \
+      --default-library=static \
+      --prefix="/portlibs/ppu" \
+      -Dtests=disabled \
+      -Dfontconfig=disabled \
+      -Dc_args="-DCAIRO_NO_MUTEX=1" \
+      -Dzlib=disabled \
+      -Dwrap_mode=nofallback
+
+    meson compile -C build-ppu
+
+
+    find build-ppu/ -name "cairo*.pc" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;
+
+}
+
+package() {
+    cd "${pkgname}-${pkgver}"
+    DESTDIR="$pkgdir" meson install -C build-ppu
+}

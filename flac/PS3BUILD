@@ -1,0 +1,44 @@
+pkgname=flac
+pkgver=1.5.0
+pkgrel=1
+pkgdesc="Free Lossless Audio Codec"
+arch=(any)
+url="https://xiph.org/flac/"
+license=('BSD-3-Clause')
+groups=('ps3-libraries')
+depends=('pthread-emb' 'libogg')
+makedepends=()
+optdepends=()
+source=("https://github.com/xiph/flac/releases/download/${pkgver}/flac-${pkgver}.tar.xz")
+sha256sums=('f2c1c76592a82ffff8413ba3c4a1299b6c7ab06c734dee03fd88630485c2b920')
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}-${pkgver}"
+
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+}
+
+build() {
+    cd "${pkgname}-${pkgver}"
+    mkdir -p build-ppu
+    cd build-ppu
+
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_PROGRAMS=OFF \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_TESTING=OFF \
+        -DBUILD_DOCS=OFF \
+        -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}-${pkgver}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

@@ -1,0 +1,66 @@
+pkgname=sdl-mixer
+pkgver=1.2.14
+pkgrel=1
+pkgdesc="An audio mixer library based on the SDL library"
+arch=(any)
+url="https://www.libsdl.org/projects/old/SDL_mixer/release-1.2.html"
+license=('Zlib')
+groups=('ps3-libraries')
+# todo webp
+depends=('sdl' 'libmikmod' 'libogg' 'libvorbis')
+makedepends=()
+optdepends=()
+source=(
+    "git+https://github.com/libsdl-org/SDL_mixer.git#commit=50517740a3916e5ffd719c053c6e7b65f933e23a"
+    "SDL_mixer-${pkgver}.patch"
+)
+sha256sums=(
+    "SKIP"
+    "SKIP"
+)
+options=('!strip')
+
+prepare() {
+    cd "SDL_mixer"
+    patch -Np0 -i ../SDL_mixer-${pkgver}.patch
+
+#    cd "${pkgname}"
+    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' SDL_*.pc.in
+    sed -i 's#@exec_prefix@#${prefix}#' SDL_*.pc.in
+    sed -i 's#@libdir@#${prefix}/lib#' SDL_*.pc.in
+    sed -i 's#@includedir@#${prefix}/include#' SDL_*.pc.in
+
+    # autogen.sh runs bare `autoconf`, which uses second-granularity mtime
+    # checks. A fresh git clone gives configure/configure.ac near-identical
+    # mtimes, so autoconf thinks configure is up to date and skips it, leaving
+    # the pre-patch configure (without our pkg-config --static fix) in place.
+    # Force an unconditional regen.
+    rm -rf autom4te.cache
+    ./autogen.sh
+    autoconf --force
+}
+
+build() {
+    cd "SDL_mixer"
+
+    mkdir -p build-ppu
+    cd build-ppu
+
+    ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" \
+        --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+	--disable-sdltest \
+        --disable-shared \
+        --disable-music-cmd \
+	--disable-music-ogg-shared \
+	--disable-music-mp3 \
+	--disable-music-flac \
+        || { exit 1; }
+
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "SDL_mixer/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

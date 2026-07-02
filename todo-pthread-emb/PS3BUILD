@@ -1,0 +1,37 @@
+pkgname=pthread-emb
+pkgver=1.0
+pkgrel=1
+pkgdesc="POSIX Threads for embedded systems (PTE)"
+arch=(any)
+url="https://github.com/bucanero/pthread-emb-ps3"
+license=('GPL-2.1')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+provides=()
+source=('git+https://github.com/bucanero/pthread-emb-ps3.git#commit=643171135e8f315e2a1c0bf469de0788f167a055')
+sha256sums=('SKIP')
+options=('!strip')
+
+build() {
+    cd "pthread-emb-ps3/platform/psl1ght"
+#    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "pthread-emb-ps3/platform/psl1ght"
+
+    #Broken makefile that ignores destdir
+    make --quiet $MAKEFLAGS || { exit 1; }
+    make install
+
+    mkdir -p $pkgdir/ppu/include
+    mkdir -p $pkgdir/ppu/lib
+    cp libpthread-psl1ght.a $pkgdir/ppu/lib/libpthread.a
+    cp pte_types.h $pkgdir/ppu/include/pte_types.h
+    cp ../../pthread.h $pkgdir/ppu/include/pthread.h
+    cp ../../semaphore.h $pkgdir/ppu/include/semaphore.h
+    cp ../../sched.h $pkgdir/ppu/include/sched.h
+
+}

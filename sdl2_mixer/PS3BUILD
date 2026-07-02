@@ -1,0 +1,44 @@
+pkgname=sdl2-mixer
+pkgver=2.8.2
+pkgrel=2
+pkgdesc="An audio mixer library based on the SDL2 library"
+arch=(any)
+url="https://wiki.libsdl.org/SDL2_mixer/FrontPage"
+license=('Zlib')
+groups=('ps3-libraries')
+# todo modplug?, opus, xmp
+depends=('sdl2' 'libvorbis' 'libogg')
+makedepends=()
+optdepends=()
+source=("https://github.com/libsdl-org/SDL_mixer/releases/download/release-${pkgver}/SDL2_mixer-${pkgver}.tar.gz")
+sha256sums=("938dff531d00ace2296557a6599abe6f34599e2f34f0a4a08a397e2ccac8b8f7")
+options=('!strip')
+
+prepare() {
+    cd "${srcdir}/SDL2_mixer-${pkgver}"
+    sed -i '/^prefix=/s/=.*$/=${PS3DEV}\/portlibs\/ppu/' SDL2_mixer.pc.in
+}
+
+build() {
+    cd "SDL2_mixer-${pkgver}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+      -DSDL2MIXER_OPUS=OFF \
+      -DSDL2MIXER_MOD=OFF \
+      -DSDL2MIXER_MIDI_FLUIDSYNTH=OFF \
+      -DSDL2MIXER_WAVPACK=OFF \
+      -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "SDL2_mixer-${pkgver}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+
+
+    cd "${srcdir}/SDL2_mixer-${pkgver}/build"
+    make --quiet DESTDIR="${pkgdir}" ${MAKEFLAGS} install
+
+    mv "${pkgdir}/portlibs/ppu/share/licenses/SDL2_mixer" "${pkgdir}/portlibs/ppu/share/licenses/${pkgname}"
+}

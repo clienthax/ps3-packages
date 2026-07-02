@@ -1,0 +1,38 @@
+pkgname=jpeg
+pkgver=3.1.90
+pkgrel=1
+pkgdesc="A free library for JPEG image compression"
+arch=(any)
+url="https://libjpeg-turbo.org/"
+license=('custom')
+groups=('ps3-libraries')
+depends=('zlib')
+makedepends=()
+optdepends=()
+source=("https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${pkgver}.tar.gz")
+sha256sums=('076ef1431f2803a91f07e0f92433d4dcf39bc9113226c4f46ba3d3d54f514c9d')
+options=('!strip')
+
+build() {
+    cd "libjpeg-turbo-${pkgver}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DWITH_SYSTEM_ZLIB=ON \
+          -DENABLE_SHARED=OFF \
+          -DWITH_TOOLS=OFF \
+          -DWITH_TESTS=OFF \
+          "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "libjpeg-turbo-${pkgver}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+    cd ..
+
+    mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 README.ijg "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+
+}

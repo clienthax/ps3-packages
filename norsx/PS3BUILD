@@ -1,0 +1,40 @@
+pkgname=NoRSX
+pkgver=0.3.2git
+pkgrel=1
+pkgdesc="NoRSX is a 2D lib for PSL1GHT"
+arch=(any)
+url="https://github.com/wargio/NoRSX"
+license=('MIT')
+groups=('ps3-libraries')
+depends=('freetype2')
+makedepends=()
+optdepends=()
+source=(
+    "git+https://github.com/wargio/NoRSX.git#commit=d93953f5df3e151eec512a22356b87895f14c435"
+    "NoRSX.make"
+    "libNoRSX.make"
+)
+sha256sums=(
+    'SKIP'
+    'SKIP'
+    'SKIP'
+)
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}"
+    cp ../NoRSX.make Makefile
+    cp ../libNoRSX.make libNoRSX/Makefile
+}
+
+build() {
+    cd "${pkgname}"
+
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}"
+    make --quiet DESTDIR=$pkgdir/portlibs/ppu $MAKEFLAGS install
+}

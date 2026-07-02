@@ -1,0 +1,41 @@
+pkgname=json-c
+pkgver=0.18
+pkgrel=1
+pkgdesc="JSON implementation in C"
+url="https://github.com/json-c/json-c/wiki"
+arch=(any)
+license=(MIT)
+groups=('ps3-libraries')
+depends=('pthread-emb')
+makedepends=()
+optdepends=()
+source=("git+https://github.com/json-c/json-c.git#commit=41a55cfcedb54d9c1874f2f0eb07b504091d7e37")
+sha256sums=('SKIP')
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}"
+
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+}
+
+build() {
+    cd "${pkgname}"
+
+    mkdir -p build-ppu
+    cd build-ppu
+
+    cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_TESTING=OFF -DBUILD_APPS=OFF -DENABLE_THREADING=ON -DUNIX=1 -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

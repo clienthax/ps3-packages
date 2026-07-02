@@ -1,0 +1,255 @@
+diff --git a/tf-psa-crypto/platform/platform_util.c b/tf-psa-crypto/platform/platform_util.c
+index 3dd58f3aa..74d309914 100644
+--- a/tf-psa-crypto/platform/platform_util.c
++++ b/tf-psa-crypto/platform/platform_util.c
+@@ -203,7 +203,11 @@ void (*mbedtls_test_hook_test_fail)(const char *, int, const char *);
+ #include <unistd.h>
+ #endif
+ 
+-#if (defined(_POSIX_VERSION) && _POSIX_VERSION >= 199309L) || defined(__HAIKU__)
++#if defined(__PPU__)
++#include <sys/systime.h>
++#endif
++
++#if (defined(_POSIX_VERSION) && _POSIX_VERSION >= 199309L) || defined(__HAIKU__) || defined(__PPU__)
+ mbedtls_ms_time_t mbedtls_ms_time(void)
+ {
+     int ret;
+@@ -212,6 +216,11 @@ mbedtls_ms_time_t mbedtls_ms_time(void)
+ 
+ #if defined(__linux__) && defined(CLOCK_BOOTTIME) || defined(__midipix__)
+     ret = clock_gettime(CLOCK_BOOTTIME, &tv);
++#elif defined(__PPU__)
++    uint64_t sec, nsec;
++    if (sysGetCurrentTime(&sec, &nsec)) return time(NULL) * 1000;
++    current_ms = sec;
++    return current_ms * 1000 + nsec / 1000000;
+ #else
+     ret = clock_gettime(CLOCK_MONOTONIC, &tv);
+ #endif
+@@ -245,7 +254,7 @@ mbedtls_ms_time_t mbedtls_ms_time(void)
+ 
+ #if !defined(MBEDTLS_PLATFORM_IS_UNIXLIKE) && \
+     !defined(__MVS__) /* z/OS */ &&           \
+-    !defined(_WIN32)
++    !defined(_WIN32) && !defined(__PPU__)
+ #error \
+     "The built-in entropy sources only work on Unix and Windows. " \
+     "Please enable MBEDTLS_PSA_DRIVER_GET_ENTROPY instead of " \
+@@ -255,6 +264,10 @@ mbedtls_ms_time_t mbedtls_ms_time(void)
+ 
+ #include "mbedtls/private/entropy.h"
+ 
++#if defined(__PPU__)
++#include <lv2/system.h>
++#endif
++
+ #if defined(_WIN32) && !defined(EFIX64) && !defined(EFI32)
+ 
+ #include <windows.h>
+@@ -381,6 +394,15 @@ int mbedtls_platform_get_entropy(psa_driver_get_entropy_flags_t flags,
+         return PSA_ERROR_NOT_SUPPORTED;
+     }
+ 
++#if defined(__PPU__)
++    if (sysGetRandomNumber(output, output_size) == 0) {
++        *estimate_bits = 8 * output_size;
++        return 0;
++    } else {
++        return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
++    }
++#endif
++
+ #if defined(HAVE_GETRANDOM)
+     ret = getrandom_wrapper(output, output_size, 0);
+     if (ret >= 0) {
+diff --git a/library/net_sockets.c b/library/net_sockets.c
+index 404ef761ae..ecce5702b0 100644
+--- a/library/net_sockets.c
++++ b/library/net_sockets.c
+@@ -7,9 +7,15 @@
+ 
+ #include "ssl_misc.h"
+ 
++#ifdef __PPU__
++#define sockaddr_storage sockaddr_in
++#include <net/select.h>
++#include <machine/endian.h>
++#endif
++
+ #if defined(MBEDTLS_NET_C)
+ 
+-#if !defined(MBEDTLS_PLATFORM_IS_UNIXLIKE) && !defined(_WIN32)
++#if !defined(MBEDTLS_PLATFORM_IS_UNIXLIKE) && !defined(_WIN32) && !defined(__PPU__)
+ #error "This module only works on Unix and Windows, see MBEDTLS_NET_C in mbedtls_config.h"
+ #endif
+ 
+@@ -146,6 +152,7 @@ void mbedtls_net_init(mbedtls_net_context *ctx)
+ int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host,
+                         const char *port, int proto)
+ {
++#ifndef __PPU__
+     int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+     struct addrinfo hints, *addr_list, *cur;
+ 
+@@ -185,6 +192,40 @@ int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host,
+     freeaddrinfo(addr_list);
+ 
+     return ret;
++#else
++if(proto){}//shutup compiler..
++
++    /* Legacy IPv4-only version */
++
++    int ret;
++    struct sockaddr_in server_addr;
++    struct hostent *server_host;
++
++    if( ( ret = net_prepare() ) != 0 )
++        return( ret );
++
++    if( ( server_host = gethostbyname( host ) ) == NULL )
++        return( MBEDTLS_ERR_NET_UNKNOWN_HOST );
++
++    if( ( ctx->fd = (int) socket( AF_INET, SOCK_STREAM, IPPROTO_IP ) ) < 0 )
++        return( MBEDTLS_ERR_NET_SOCKET_FAILED );
++
++    memcpy( (void *) &server_addr.sin_addr,
++            (void *) server_host->h_addr,
++                     server_host->h_length );
++
++    server_addr.sin_family = AF_INET;
++    server_addr.sin_port   = htons( atoi(port) );
++
++    if( connect( ctx->fd, (struct sockaddr *) &server_addr,
++                 sizeof( server_addr ) ) < 0 )
++    {
++        close( ctx->fd );
++        return( MBEDTLS_ERR_NET_CONNECT_FAILED );
++    }
++
++    return( 0 );
++#endif
+ }
+ 
+ /*
+@@ -192,6 +233,7 @@ int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host,
+  */
+ int mbedtls_net_bind(mbedtls_net_context *ctx, const char *bind_ip, const char *port, int proto)
+ {
++#ifndef __PPU__
+     int n, ret;
+     struct addrinfo hints, *addr_list, *cur;
+ 
+@@ -253,7 +295,60 @@ int mbedtls_net_bind(mbedtls_net_context *ctx, const char *bind_ip, const char *
+     freeaddrinfo(addr_list);
+ 
+     return ret;
++#else
++	if(proto){}//shutup compiler
++
++    /* Legacy IPv4-only version */
++
++    int ret, n, c[4];
++    struct sockaddr_in server_addr;
++
++    if( ( ret = net_prepare() ) != 0 )
++        return( ret );
+ 
++    if( ( ctx->fd = (int) socket( AF_INET, SOCK_STREAM, IPPROTO_IP ) ) < 0 )
++        return( MBEDTLS_ERR_NET_SOCKET_FAILED );
++
++    n = 1;
++    setsockopt( ctx->fd, SOL_SOCKET, SO_REUSEADDR,
++               (const char *) &n, sizeof( n ) );
++
++    server_addr.sin_addr.s_addr = htonl( INADDR_ANY );
++    server_addr.sin_family      = AF_INET;
++    server_addr.sin_port        = htons( atoi(port) );
++
++    if( bind_ip != NULL )
++    {
++        memset( c, 0, sizeof( c ) );
++        sscanf( bind_ip, "%d.%d.%d.%d", &c[0], &c[1], &c[2], &c[3] );
++
++        for( n = 0; n < 4; n++ )
++            if( c[n] < 0 || c[n] > 255 )
++                break;
++
++        if( n == 4 )
++            server_addr.sin_addr.s_addr = htonl(
++                ( (uint32_t) c[0] << 24 ) |
++                ( (uint32_t) c[1] << 16 ) |
++                ( (uint32_t) c[2] <<  8 ) |
++                ( (uint32_t) c[3]       ) );
++    }
++
++    if( bind( ctx->fd, (struct sockaddr *) &server_addr,
++              sizeof( server_addr ) ) < 0 )
++    {
++        close( ctx->fd );
++        return( MBEDTLS_ERR_NET_BIND_FAILED );
++    }
++
++    if( listen( ctx->fd, MBEDTLS_NET_LISTEN_BACKLOG ) != 0 )
++    {
++        close( ctx->fd );
++        return( MBEDTLS_ERR_NET_LISTEN_FAILED );
++    }
++
++    return( 0 );
++#endif
+ }
+ 
+ #if (defined(_WIN32) || defined(_WIN32_WCE)) && !defined(EFIX64) && \
+@@ -313,7 +408,7 @@ int mbedtls_net_accept(mbedtls_net_context *bind_ctx,
+ 
+ #if defined(__socklen_t_defined) || defined(_SOCKLEN_T) ||  \
+     defined(_SOCKLEN_T_DECLARED) || defined(__DEFINED_socklen_t) || \
+-    defined(socklen_t) || (defined(_POSIX_VERSION) && _POSIX_VERSION >= 200112L)
++    defined(socklen_t) || (defined(_POSIX_VERSION) && _POSIX_VERSION >= 200112L) || defined(__PPU__)
+     socklen_t n = (socklen_t) sizeof(client_addr);
+     socklen_t type_len = (socklen_t) sizeof(type);
+ #else
+@@ -372,7 +467,12 @@ int mbedtls_net_accept(mbedtls_net_context *bind_ctx,
+         n = sizeof(struct sockaddr_storage);
+         if (getsockname(client_ctx->fd,
+                         (struct sockaddr *) &local_addr, &n) != 0 ||
+-            (bind_ctx->fd = (int) socket(local_addr.ss_family,
++            (bind_ctx->fd = (int) socket(
++#ifndef __PPU__
++local_addr.ss_family,
++#else
++local_addr.sin_family,
++#endif
+                                          SOCK_DGRAM, IPPROTO_UDP)) < 0 ||
+             setsockopt(bind_ctx->fd, SOL_SOCKET, SO_REUSEADDR,
+                        (const char *) &one, sizeof(one)) != 0) {
+@@ -385,7 +485,11 @@ int mbedtls_net_accept(mbedtls_net_context *bind_ctx,
+     }
+ 
+     if (client_ip != NULL) {
++#ifdef __PPU__
++        if (client_addr.sin_family == AF_INET) {
++#else
+         if (client_addr.ss_family == AF_INET) {
++#endif
+             struct sockaddr_in *addr4 = (struct sockaddr_in *) &client_addr;
+             *cip_len = sizeof(addr4->sin_addr.s_addr);
+ 
+@@ -394,6 +498,7 @@ int mbedtls_net_accept(mbedtls_net_context *bind_ctx,
+             }
+ 
+             memcpy(client_ip, &addr4->sin_addr.s_addr, *cip_len);
++#ifndef __PPU__
+         } else {
+             struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *) &client_addr;
+             *cip_len = sizeof(addr6->sin6_addr.s6_addr);
+@@ -403,6 +508,7 @@ int mbedtls_net_accept(mbedtls_net_context *bind_ctx,
+             }
+ 
+             memcpy(client_ip, &addr6->sin6_addr.s6_addr, *cip_len);
++#endif
+         }
+     }
+ 

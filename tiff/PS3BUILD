@@ -1,0 +1,36 @@
+pkgname=libtiff
+pkgver=4.7.1
+pkgrel=1
+pkgdesc="TIFF Decoding library"
+arch=(any)
+url="https://gitlab.com/libtiff/libtiff"
+license=('Libtiff')
+groups=('ps3-libraries')
+depends=('zlib' 'liblzma' 'jpeg')
+makedepends=()
+optdepends=()
+source=("https://github.com/libsdl-org/libtiff/archive/v${pkgver}.tar.gz")
+sha256sums=('a3faec056a490c62b8749847317521204f8c4d9933cce834e691a74524ec38fe')
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}-${pkgver}"
+    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' libtiff-4.pc.in
+    sed -i 's#@exec_prefix@#${prefix}#' libtiff-4.pc.in
+    sed -i 's#@libdir@#${prefix}/lib#' libtiff-4.pc.in
+    sed -i 's#@includedir@#${prefix}/include#' libtiff-4.pc.in
+}
+
+build() {
+    cd "${pkgname}-${pkgver}"
+    mkdir -p build
+    cd build
+    cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+          -Dtiff-tools=off -Dtiff-tests=off -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}-${pkgver}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

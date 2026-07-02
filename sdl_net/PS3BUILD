@@ -1,0 +1,57 @@
+pkgname=sdl-net
+pkgver=1.2.9
+pkgrel=1
+pkgdesc="A wrapper over TCP/IP sockets"
+arch=(any)
+url="https://www.libsdl.org/projects/old/SDL_mixer/release-1.2.html"
+license=('Zlib')
+groups=('ps3-libraries')
+depends=('sdl')
+makedepends=()
+optdepends=()
+source=(
+    "git+https://github.com/libsdl-org/SDL_net.git#commit=8363cd02baf1b65c287691bdd22c3dc87da9759d"
+    "SDL_net-${pkgver}.patch"
+)
+sha256sums=(
+    "SKIP"
+    "SKIP"
+)
+options=('!strip')
+
+prepare() {
+    cd "SDL_net"
+    patch -Np1 -i ../SDL_net-${pkgver}.patch
+
+#    cd "${pkgname}"
+    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' SDL_*.pc.in
+    sed -i 's#@exec_prefix@#${prefix}#' SDL_*.pc.in
+    sed -i 's#@libdir@#${prefix}/lib#' SDL_*.pc.in
+    sed -i 's#@includedir@#${prefix}/include#' SDL_*.pc.in
+
+    rm -rf autom4te.cache
+    ./autogen.sh
+    autoconf --force
+}
+
+build() {
+    cd "SDL_net"
+
+    mkdir -p build-ppu
+    cd build-ppu
+
+    CFLAGS="$CFLAGS -I$PS3DEV/ppu/include -L$PS3DEV/ppu/lib" \
+    ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" \
+        --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+	--disable-sdltest \
+        --disable-shared \
+        || { exit 1; }
+
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "SDL_net/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

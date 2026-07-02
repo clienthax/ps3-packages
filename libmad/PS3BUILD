@@ -1,0 +1,42 @@
+pkgname=libmad
+pkgver=0.15.1b
+pkgrel=1
+pkgdesc="MPEG audio decoder library for PSP"
+arch=(any)
+url="https://www.underbit.com/products/mad"
+license=('GPL-2.0-only')
+groups=('psp-libraries')
+depends=()
+makedepends=()
+optdepends=()
+makedepends=()
+source=("https://downloads.sourceforge.net/project/mad/libmad/0.15.1b/libmad-0.15.1b.tar.gz")
+sha256sums=("bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690")
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}-${pkgver}"
+
+    sed -i 's/optimize="$optimize -fforce-mem"/optimize="$optimize"/' configure
+
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+}
+
+build() {
+    cd "${pkgname}-${pkgver}"
+    mkdir -p build-ppu
+    cd build-ppu
+
+    ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared    
+
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}-${pkgver}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

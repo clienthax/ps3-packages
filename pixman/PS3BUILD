@@ -1,0 +1,57 @@
+pkgname=pixman
+pkgver=0.46.4
+pkgrel=1
+pkgdesc="Pixman is a low-level software library for pixel manipulation"
+arch=(any)
+url="http://pixman.org/"
+license=('MIT')
+groups=('ps3-libraries')
+depends=('pthread-emb' 'libpng' 'zlib')
+makedepends=()
+optdepends=()
+group=('all')
+source=("https://xorg.freedesktop.org/archive/individual/lib/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('d09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c')
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}-${pkgver}"
+    # Patch thread option
+    sed -i "s/dep_threads = dependency('threads')/dep_threads = declare_dependency(\n  compile_args : [],\n  link_args : ['-lpthread'],\n)/" meson.build
+
+}
+
+build() {
+    cd "${pkgname}-${pkgver}"
+    mkdir -p build-ppu
+
+    meson setup --wipe build-ppu \
+      --cross-file $PS3DEV/etc/ps3-ppu-cross.txt \
+      --default-library=static \
+      --prefix="/portlibs/ppu" \
+      -Dtests=disabled \
+      -Ddemos=disabled \
+      -Dgtk=disabled \
+      -Dmmx=disabled \
+      -Dsse2=disabled \
+      -Dwrap_mode=nofallback
+    meson compile -C build-ppu
+
+
+    find build-ppu/ -name "pixman-1.pc" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;
+
+}
+
+package() {
+    cd "${pkgname}-${pkgver}"
+    DESTDIR="$pkgdir" meson install -C build-ppu
+    # Patch paths in pkgconfig
+#    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' $pkgdir/portlibs/ppu/lib/pkgconfig/pixman-1.pc
+#    sed -i 's#@exec_prefix@#${prefix}#' $pkgdir/portlibs/ppu/lib/pkgconfig/pixman-1.pc
+#    sed -i 's#@libdir@#${prefix}/lib#' $pkgdir/portlibs/ppu/lib/pkgconfig/pixman-1.pc
+#    sed -i 's#@includedir@#${prefix}/include#' $pkgdir/portlibs/ppu/lib/pkgconfig/pixman-1.pc
+}

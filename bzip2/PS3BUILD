@@ -1,0 +1,33 @@
+pkgname=bzip2
+pkgver=1.0.8
+pkgrel=1
+pkgdesc="A high-quality data compression library"
+arch=(any)
+url="http://www.sourceware.org/bzip2/"
+license=('custom')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+source=("git+https://gitlab.com/bzip2/bzip2.git#commit=bf5f505d0156ad5c6635d05db06b1bb7593b45b7")
+sha256sums=('SKIP')
+options=('!strip')
+
+build() {
+    cd "$pkgname"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+        -DENABLE_LIB_ONLY=ON -DENABLE_TESTS=OFF -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "$pkgname/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+    cd ..
+
+    mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 COPYING "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+
+}

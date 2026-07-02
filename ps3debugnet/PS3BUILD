@@ -1,0 +1,36 @@
+pkgname=ps3debugnet
+pkgver=1
+pkgrel=1
+pkgdesc="debugnet is a PS3 small library to debug your homebrew code over udp"
+url="https://github.com/sergiou87/ps3debugnet"
+arch=(any)
+license=('Custom')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+source=(
+    "git+https://github.com/sergiou87/ps3debugnet.git#commit=47c3644af08836109d6845afb2d3eeebdb8807de"
+    "Makefile.make"
+)
+
+sha256sums=(
+    'SKIP'
+    'SKIP'
+)
+options=('!strip')
+
+prepare() {
+    cd "${pkgname}"
+    cp ../Makefile.make libdebugnet/Makefile
+}
+
+build() {
+    cd "${pkgname}"/libdebugnet
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}/libdebugnet"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

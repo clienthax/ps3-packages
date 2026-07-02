@@ -1,0 +1,40 @@
+pkgname=harfbuzz
+pkgver=14.2.1
+pkgrel=1
+pkgdesc="HarfBuzz text shaping engine"
+arch=(any)
+url="https://github.com/google/brotli"
+license=('custom')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+source=("https://github.com/harfbuzz/harfbuzz/archive/${pkgver}.tar.gz")
+sha256sums=('3c2a9006a7e1bf58737e557014d7882c554c628fb379a9f00008f5ea53dbbdfb')
+options=('!strip')
+
+prepare() {
+    cd "harfbuzz-${pkgver}/src"
+    sed -i 's#%prefix%#${PS3DEV}/portlibs/ppu#' harfbuzz*.pc.in
+    sed -i 's#%exec_prefix%#${prefix}#' harfbuzz*.pc.in
+    sed -i 's#%libdir%#${prefix}/lib#' harfbuzz*.pc.in
+    sed -i 's#%includedir%#${prefix}/include#' harfbuzz*.pc.in
+}
+
+build() {
+    cd "$pkgname-${pkgver}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "$pkgname-${pkgver}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+
+    mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 ../COPYING "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+}

@@ -1,0 +1,36 @@
+pkgname=libzip
+pkgver=1.11.4
+pkgrel=8
+pkgdesc="libzip is a C library for reading, creating, and modifying zip archives."
+arch=(any)
+url="https://libzip.org/"
+license=('BSD-3-Clause')
+groups=('ps3-libraries')
+# todo mbedtls
+depends=('zlib' 'bzip2' 'liblzma')
+makedepends=()
+optdepends=()
+source=("https://libzip.org/download/libzip-1.11.4.tar.xz")
+sha256sums=('8a247f57d1e3e6f6d11413b12a6f28a9d388de110adc0ec608d893180ed7097b')
+options=('!strip')
+
+prepare() {
+    cd "$pkgname-$pkgver"
+    sed -i 's#@CMAKE_INSTALL_PREFIX@#${PS3DEV}/portlibs/ppu#' libzip.pc.in
+}
+
+build() {
+    cd "$pkgname-${pkgver}"
+    mkdir -p build
+    cd build
+    cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_EXAMPLES=OFF \
+          -DBUILD_TOOLS=OFF \
+          -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "$pkgname-${pkgver}/build"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}

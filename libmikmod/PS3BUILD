@@ -1,0 +1,56 @@
+pkgname=libmikmod
+pkgver=3.1.11
+pkgrel=1
+pkgdesc="libmikmod"
+arch=(any)
+url="https://https://mikmod.sourceforge.net/"
+license=('LGPL-2.1-only')
+groups=('ps3-libraries')
+depends=()
+makedepends=()
+optdepends=()
+source=(
+    "https://mikmod.raphnet.net/files/libmikmod-3.1.11.tar.gz"
+    "${pkgname}-${pkgver}-PPU.patch"
+)
+sha256sums=(
+    "2d7598cd2a8c61c023f27c9c7c1aca8bbfd92aadbee2f98b7a6d421eae35c929"
+    "SKIP"
+)
+options=('!strip')
+
+#todo update~
+
+prepare() {
+    cd "${pkgname}-${pkgver}"
+    patch -Np1 -i ../${pkgname}-${pkgver}-PPU.patch
+
+    cd "${pkgname}"
+#    sed -i 's#@prefix@#${PS3DEV}/portlibs/ppu#' libmikmod.pc.in
+#    sed -i 's#@exec_prefix@#${prefix}#' libmikmod.pc.in
+#    sed -i 's#@libdir@#${prefix}/lib#' libmikmod.pc.in
+#    sed -i 's#@includedir@#${prefix}/include#' libmikmod.pc.in
+}
+
+build() {
+    cd "${pkgname}-${pkgver}"
+    mkdir -p build-ppu
+    cd build-ppu
+
+    CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
+    LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2" \
+    CC="powerpc64-ps3-elf-gcc" LD="powerpc64-ps3-elf-ld" NM="powerpc64-ps3-elf-nm" \
+    AR="powerpc64-ps3-elf-ar" \
+    RANLIB="powerpc64-ps3-elf-ranlib" STRIP="powerpc64-ps3-elf-strip" \
+    ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-esd --disable-dl --disable-shared
+
+
+    #cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+    #      -Dtiff-tools=off -Dtiff-tests=off -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
+}
+
+package() {
+    cd "${pkgname}-${pkgver}/build-ppu"
+    make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+}
