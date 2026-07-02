@@ -44,7 +44,7 @@ jobs:
 
     - name: Install Linux requirements
       run: |
-        sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev meson python3
+        sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev meson python3 ninja-build build-essential libarchive-dev libarchive-tools libcurl4-openssl-dev libgpgme-dev
 
     - uses: actions/checkout@v7
       with:
@@ -68,6 +68,11 @@ jobs:
         echo "PS3DEV=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
         echo "PSL1GHT=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
         echo "PATH=$PATH:$PWD/ps3dev/bin:$PWD/ps3dev/ppu/bin:$PWD/ps3dev/spu/bin" >> $GITHUB_ENV
+
+    - name: Install .cmake file
+      run: |
+        mkdir -p ${PS3DEV}/ps3/share
+        cp ${GITHUB_WORKSPACE}/ps3-packages/ps3dev.cmake ${PS3DEV}/ps3/share/
 
     - name: Build ps3-pacman
       run: |
