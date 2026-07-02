@@ -56,7 +56,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        TOOLCHAIN_URL=$(gh api repos/ps3dev/ps3toolchain/releases \
+        TOOLCHAIN_URL=$(gh api repos/ps3dev/ps3dev/releases \
           --jq '
             map(select(.prerelease and (.draft | not)))
             | sort_by(.published_at)
@@ -65,7 +65,7 @@ jobs:
             | select(.name == "ps3dev-linux-X64.tar.gz")
             | .browser_download_url
           ')
-        curl -sL "$TOOLCHAIN_URL" | tar xvz -C ./
+        curl -sL "$TOOLCHAIN_URL" | tar xz -C ./
         echo "PS3DEV=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
         echo "PSL1GHT=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
         echo "PATH=$PATH:$PWD/ps3dev/bin:$PWD/ps3dev/ppu/bin:$PWD/ps3dev/spu/bin" >> $GITHUB_ENV
