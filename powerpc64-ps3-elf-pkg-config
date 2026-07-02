@@ -1,0 +1,4 @@
+#!/bin/sh
+export PKG_CONFIG_LIBDIR="$PS3DEV/portlibs/ppu/lib/pkgconfig"
+exec /usr/bin/pkg-config --define-variable=PS3DEV=$PS3DEV "$@"
+
