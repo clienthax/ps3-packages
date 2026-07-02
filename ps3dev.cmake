@@ -36,6 +36,7 @@ set(CMAKE_RANLIB powerpc64-ps3-elf-ranlib)
 set(CMAKE_STRIP powerpc64-ps3-elf-strip)
 set(CMAKE_NM powerpc64-ps3-elf-nm)
 set(CMAKE_LINKER powerpc64-ps3-elf-ld)
+set(CMAKE_PKG_CONFIG powerpc64-ps3-elf-pkg-config)
 
 SET(PPU_CFLAGS "-mcpu=cell -mtune=cell -maltivec -mhard-float -fmodulo-sched -ffunction-sections -fdata-sections -I$ENV{PS3DEV}/ppu/include -I$ENV{PS3DEV}/ppu/powerpc64-ps3-elf/include -I$ENV{PS3DEV}/portlibs/ppu/include -I$ENV{PS3DEV}/ppu/include/simdmath")
 SET(PPU_CFLAGS "${PPU_CFLAGS} -fomit-frame-pointer -fstrict-aliasing -funroll-loops -ftree-vectorize")
