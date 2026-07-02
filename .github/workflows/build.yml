@@ -74,7 +74,7 @@ jobs:
       run: |
         mkdir -p ${PS3DEV}/ps3/share
         cp ${GITHUB_WORKSPACE}/ps3-packages/ps3dev.cmake ${PS3DEV}/ps3/share/
-        cp ${GITHUB_WPRKSPACE}/ps3-packages/powerpc64-ps3-elf-pkg-config ${PS3DEV}/ppu/bin/
+        cp ${GITHUB_WORKSPACE}/ps3-packages/powerpc64-ps3-elf-pkg-config ${PS3DEV}/ppu/bin/
 
     - name: Build ps3-pacman
       run: |
