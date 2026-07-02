@@ -70,10 +70,11 @@ jobs:
         echo "PSL1GHT=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
         echo "PATH=$PATH:$PWD/ps3dev/bin:$PWD/ps3dev/ppu/bin:$PWD/ps3dev/spu/bin" >> $GITHUB_ENV
 
-    - name: Install .cmake file
+    - name: Bodges
       run: |
         mkdir -p ${PS3DEV}/ps3/share
         cp ${GITHUB_WORKSPACE}/ps3-packages/ps3dev.cmake ${PS3DEV}/ps3/share/
+        cp ${GITHUB_WPRKSPACE}/ps3-packages/powerpc64-ps3-elf-pkg-config ${PS3DEV}/ppu/bin/
 
     - name: Build ps3-pacman
       run: |
