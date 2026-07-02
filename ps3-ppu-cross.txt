@@ -1,0 +1,25 @@
+[binaries]
+c = 'powerpc64-ps3-elf-gcc'
+cpp = 'powerpc64-ps3-elf-g++'
+ar = 'powerpc64-ps3-elf-ar'
+ranlib = 'powerpc64-ps3-elf-ranlib'
+ld = 'powerpc64-ps3-elf-ld'
+strip = 'powerpc64-ps3-elf-strip'
+as = 'powerpc64-ps3-elf-as'
+pkg-config = 'powerpc64-ps3-elf-pkg-config'
+
+[properties]
+#have_mmap = false
+
+[built-in options]
+#c_args = ['-I/home/haxy/ps3dev-clang-toolchain/ppu/include', '-I/home/haxy/ps3dev-clang-toolchain/portlibs/ppu/include']
+#c_link_args = ['-L/home/haxy/ps3dev-clang-toolchain/ppu/lib', '-L/home/haxy/ps3dev-clang-toolchain/portlibs/ppu/lib', '-lrt', '-llv2', '-lpthread']
+#cpp_args = ['-I/home/haxy/ps3dev-clang-toolchain/ppu/include', '-I/home/haxy/ps3dev-clang-toolchain/portlibs/ppu/include']
+#cpp_link_args = ['-L/home/haxy/ps3dev-clang-toolchain/ppu/lib', '-L/home/haxy/ps3dev-clang-toolchain/portlibs/ppu/lib', '-lrt', '-llv2', '-lpthread']
+
+[target_machine]
+system = 'none'
+cpu_family = 'ppc64'
+cpu = 'powerpc64'
+endian = 'big'
+
