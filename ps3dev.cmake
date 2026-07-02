@@ -26,7 +26,7 @@ endif()
 
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
-SET(CMAKE_SYSTEM_PROCESSOR powerpc)
+SET(CMAKE_SYSTEM_PROCESSOR powerpc64)
 
 set(CMAKE_C_COMPILER powerpc64-ps3-elf-gcc)
 set(CMAKE_CXX_COMPILER powerpc64-ps3-elf-g++)
@@ -36,14 +36,14 @@ set(CMAKE_STRIP powerpc64-ps3-elf-strip)
 set(CMAKE_NM powerpc64-ps3-elf-nm)
 set(CMAKE_LINKER powerpc64-ps3-elf-ld)
 
-SET(PPU_CFLAGS "-mcpu=cell -mtune=cell -maltivec -mhard-float -fmodulo-sched -ffunction-sections -fdata-sections -I$ENV{PS3DEV}/ppu/include -I$ENV{PS3DEV}/portlibs/ppu/include -I$ENV{PS3DEV}/ppu/include/simdmath")
+SET(PPU_CFLAGS "-mcpu=cell -mtune=cell -maltivec -mhard-float -fmodulo-sched -ffunction-sections -fdata-sections -I$ENV{PS3DEV}/ppu/include -I$ENV{PS3DEV}/ppu/powerpc64-ps3-elf/include -I$ENV{PS3DEV}/portlibs/ppu/include -I$ENV{PS3DEV}/ppu/include/simdmath")
 SET(PPU_CFLAGS "${PPU_CFLAGS} -fomit-frame-pointer -fstrict-aliasing -funroll-loops -ftree-vectorize")
 SET(PPU_CXXFLAGS "-D_GLIBCXX11_USE_C99_STDIO ${PPU_CFLAGS}")
 SET(PPU_LDFLAGS "-mhard-float -fmodulo-sched -Wl,--gc-sections -L$ENV{PS3DEV}/ppu/lib -L$ENV{PS3DEV}/portlibs/ppu/lib -lm -lgcm_sys -lrsx -lsysutil -lio -laudio -lrt -llv2 -lio -laudio")
 
 SET(CMAKE_INSTALL_PREFIX $ENV{PS3DEV}/portlibs/ppu)
 
-SET(CMAKE_FIND_ROOT_PATH $ENV{PS3DEV} $ENV{PS3DEV}/ppu $ENV{PS3DEV}/portlibs/ppu)
+SET(CMAKE_FIND_ROOT_PATH $ENV{PS3DEV} $ENV{PS3DEV}/ppu $ENV{PS3DEV}/ppu/powerpc64-ps3-elf $ENV{PS3DEV}/portlibs/ppu)
 SET(CMAKE_PREFIX_PATH "$ENV{PS3DEV}/portlibs/ppu")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
