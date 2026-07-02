@@ -102,7 +102,7 @@ jobs:
     - uses: actions/upload-artifact@v7
       with:
         name: artifact-${{ env.PACKAGE }}
-        path: ${{ env.PACKAGE }}/*.pkg.tar.gz
+        path: ps3-packages/${{ env.PACKAGE }}/*.pkg.tar.gz
 
   package_repo:
     if: contains(github.ref,'refs/heads/master')
