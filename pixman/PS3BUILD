@@ -10,8 +10,14 @@ depends=('pthread-emb' 'libpng' 'zlib')
 makedepends=()
 optdepends=()
 group=('all')
-source=("https://xorg.freedesktop.org/archive/individual/lib/${pkgname}-${pkgver}.tar.gz")
-sha256sums=('d09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c')
+source=(
+    "https://xorg.freedesktop.org/archive/individual/lib/${pkgname}-${pkgver}.tar.gz"
+    "pixman-ps3-vmx.patch"
+)
+sha256sums=(
+    "d09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c"
+    "SKIP"
+)
 options=('!strip')
 
 prepare() {
@@ -19,6 +25,7 @@ prepare() {
     # Patch thread option
     sed -i "s/dep_threads = dependency('threads')/dep_threads = declare_dependency(\n  compile_args : [],\n  link_args : ['-lpthread'],\n)/" meson.build
 
+    patch -Np0 -i ../pixman-ps3-vmx.patch
 }
 
 build() {
@@ -34,7 +41,7 @@ build() {
       -Dgtk=disabled \
       -Dmmx=disabled \
       -Dsse2=disabled \
-      -Dvmx=disabled \
+      -Dvmx=enabled \
       -Dwrap_mode=nofallback
     meson compile -C build-ppu
 
