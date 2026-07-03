@@ -134,7 +134,6 @@ jobs:
     - name: Create repo files
       run: |
         chown -R $(id -nu):$(id -ng) .
-        apk add --no-cache bash coreutils
         mkdir repo
         cp artifact-*/*.pkg.tar.gz repo/
         ./make-repo-html.sh
