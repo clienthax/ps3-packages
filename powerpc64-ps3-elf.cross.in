@@ -6,6 +6,7 @@ ranlib = 'powerpc64-ps3-elf-ranlib'
 strip = 'powerpc64-ps3-elf-strip'
 nm = 'powerpc64-ps3-elf-nm'
 ld = 'powerpc64-ps3-elf-ld'
+pkg-config = 'powerpc64-ps3-elf-pkg-config'
 
 [host_machine]
 system = 'none'
@@ -16,6 +17,11 @@ endian = 'big'
 [properties]
 sys_root = '@PS3DEV@/ppu/powerpc64-ps3-elf'
 needs_exe_wrapper = true
+pkg_config_libdir = [
+    '@PS3DEV@/ppu/powerpc64-ps3-elf/lib/pkgconfig',
+    '@PSL1GHT@/ppu/lib/pkgconfig',
+    '@PS3DEV@/portlibs/ppu/lib/pkgconfig'
+]
 
 [built-in options]
 c_args = ['-mcpu=cell', '-I@PS3DEV@/ppu/powerpc64-ps3-elf/include', '-I@PSL1GHT@/ppu/include', '-I@PS3DEV@/portlibs/ppu/include']
