@@ -1,0 +1,167 @@
+name: Packages
+
+on:
+  push:
+  pull_request:
+  repository_dispatch:
+    types: [run_build]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  packages: write
+
+jobs:
+  prepare_jobs:
+    runs-on: ubuntu-latest
+    container: python:3-alpine
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: ps3-packages
+      - name: Generate build list
+        id: set-matrix
+        run: |
+          cd ps3-packages
+          echo "build_list=$(./get_build_order.py)" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+    outputs:
+      build_list: ${{ steps.set-matrix.outputs.build_list }}
+
+  build:
+    needs: [prepare_jobs]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        packages: ${{ fromJson(needs.prepare_jobs.outputs.build_list) }}
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        path: ps3-packages
+
+    - name: Install Linux requirements
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev meson python3 ninja-build build-essential libarchive-dev libarchive-tools libcurl4-openssl-dev libgpgme-dev
+        # mbedtls deps..
+        sudo apt-get -y install python3-jsonschema python3-jinja2
+
+    - uses: actions/checkout@v7
+      with:
+        repository: clienthax/ps3-pacman
+        path: ps3-pacman
+
+    - name: Download PS3DEV Toolchain
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        TOOLCHAIN_URL=$(gh api repos/ps3dev/ps3dev/releases \
+          --jq '
+            map(select(.prerelease and (.draft | not)))
+            | sort_by(.published_at)
+            | reverse
+            | .[0].assets[]
+            | select(.name == "ps3dev-linux-X64.tar.gz")
+            | .browser_download_url
+          ')
+        curl -sL "$TOOLCHAIN_URL" | tar xz -C ./
+        echo "PS3DEV=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
+        echo "PSL1GHT=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
+        echo "PATH=$PATH:$PWD/ps3dev/bin:$PWD/ps3dev/ppu/bin:$PWD/ps3dev/spu/bin" >> $GITHUB_ENV
+
+    - name: Bodges
+      run: |
+        mkdir -p ${PS3DEV}/ps3/share
+        mkdir -p ${PS3DEV}/etc
+        cp ${GITHUB_WORKSPACE}/ps3-packages/ps3dev.cmake ${PS3DEV}/ps3/share/
+        cp ${GITHUB_WORKSPACE}/ps3-packages/powerpc64-ps3-elf-pkg-config ${PS3DEV}/ppu/bin/
+        # The prebuilt toolchain bundles a stale portlibs tree (non-relocatable
+        # .la files, old headers/.pc baked to the ps3dev build runner path).
+        # This repo builds all portlibs itself, so wipe it for a clean slate.
+        rm -rf ${PS3DEV}/portlibs
+        mkdir -p ${PS3DEV}/portlibs/ppu/lib/pkgconfig
+
+    - name: Generate Meson Cross
+      run: |
+        cd ${GITHUB_WORKSPACE}/ps3-packages
+        ./gen_cross_file.py
+        cat powerpc64-ps3-elf.cross
+        cp ${GITHUB_WORKSPACE}/ps3-packages/powerpc64-ps3-elf.cross ${PS3DEV}/etc/ps3-ppu-cross.txt
+
+    - name: Build ps3-pacman
+      run: |
+        cd ${GITHUB_WORKSPACE}/ps3-pacman
+        ./pacman.sh
+
+    - name: Build packages
+      run: |
+        #adduser --disabled-password --home /build --shell /bin/bash build
+        #chown -R build:build /build ${PS3DEV}
+        for f in ${{ matrix.packages }}; do
+        #chown -R build:build $f
+        cd ${GITHUB_WORKSPACE}/ps3-packages/$f
+        #sudo -u build PATH=${PATH} PS3DEV=${PS3DEV} LIBMAKEPKG_LINT_PACKAGE_DOTFILES_SH=0 ${PS3DEV}/bin/ps3-makepkg --noconfirm --noprogressbar
+        #sudo -u build PATH=${PATH} PS3DEV=${PS3DEV} ${PS3DEV}/bin/ps3-pacman -U --noconfirm *.pkg.tar.gz --overwrite '*'
+        PATH=${PATH} PS3DEV=${PS3DEV} LIBMAKEPKG_LINT_PACKAGE_DOTFILES_SH=0 ${PS3DEV}/bin/ps3-makepkg --noconfirm --noprogressbar
+        PATH=${PATH} PS3DEV=${PS3DEV} ${PS3DEV}/bin/ps3-pacman -U --noconfirm *.pkg.tar.gz --overwrite '*'
+        cd ..
+        done
+
+    - name: Store package
+      run: |
+        export PACKAGE=`echo ${{ matrix.packages }} | awk '{print $NF}'`
+        echo "PACKAGE=$PACKAGE" >> $GITHUB_ENV
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: artifact-${{ env.PACKAGE }}
+        path: ps3-packages/${{ env.PACKAGE }}/*.pkg.tar.gz
+
+  package_repo:
+    if: contains(github.ref,'refs/heads/master')
+    needs: [prepare_jobs, build]
+    runs-on: ubuntu-latest
+    container: ghcr.io/PS3DEV/ps3sdk:latest
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - name: Download artifacts
+      uses: actions/download-artifact@v8
+    - name: Create repo files
+      run: |
+        chown -R $(id -nu):$(id -ng) .
+        apk add --no-cache bash coreutils
+        mkdir repo
+        cp artifact-*/*.pkg.tar.gz repo/
+        ./make-repo-html.sh
+        cd repo
+        ${PS3DEV}/share/pacman/bin/repo-add PS3DEV.db.tar.gz *.pkg.tar.gz
+        mv PS3DEV.db.tar.gz PS3DEV.db
+        mv PS3DEV.files.tar.gz PS3DEV.files
+        tar -cvf ../repo.tar ./*
+    - name: Upload repo artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: github-pages
+        path: repo.tar
+
+  publish_repo:
+    if: contains(github.ref,'refs/heads/master')
+    needs: [package_repo]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
