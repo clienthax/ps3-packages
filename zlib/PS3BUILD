@@ -20,9 +20,9 @@ prepare() {
     sed -i 's#@libdir@#${prefix}/lib#' zlib.pc.in
     sed -i 's#@includedir@#${prefix}/include#' zlib.pc.in
 
-sed -i 's#@CMAKE_INSTALL_PREFIX@#${PS3DEV}/portlibs/ppu#g' zlib.pc.cmakein
-sed -i 's#@CMAKE_INSTALL_LIBDIR@#lib#g' zlib.pc.cmakein
-sed -i 's#@CMAKE_INSTALL_INCLUDEDIR@#include#g' zlib.pc.cmakein
+   sed -i 's#@CMAKE_INSTALL_PREFIX@#${PS3DEV}/portlibs/ppu#g' zlib.pc.cmakein
+   sed -i 's#@CMAKE_INSTALL_LIBDIR@#lib#g' zlib.pc.cmakein
+   sed -i 's#@CMAKE_INSTALL_INCLUDEDIR@#include#g' zlib.pc.cmakein
 }
 
 
@@ -49,7 +49,7 @@ package() {
     install -m 644 ../README "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
 
     # Install documentation
-    mkdir -p "$pkgdir/portlibs/ppu/share/doc/"
-    cp -r ../doc "$pkgdir/portlibs/ppu/share/doc/$pkgname"
+    #mkdir -p "$pkgdir/portlibs/ppu/share/doc/"
+    #cp -r ../doc "$pkgdir/portlibs/ppu/share/doc/$pkgname"
 }
 

@@ -43,7 +43,9 @@ SET(PPU_CFLAGS "${PPU_CFLAGS} -fomit-frame-pointer -fstrict-aliasing -funroll-lo
 SET(PPU_CXXFLAGS "-D_GLIBCXX11_USE_C99_STDIO ${PPU_CFLAGS}")
 SET(PPU_LDFLAGS "-mhard-float -fmodulo-sched -Wl,--gc-sections -L$ENV{PS3DEV}/ppu/lib -L$ENV{PS3DEV}/portlibs/ppu/lib -lm -lgcm_sys -lrsx -lsysutil -lio -laudio -lrt -llv2 -lio -laudio")
 
-SET(CMAKE_INSTALL_PREFIX $ENV{PS3DEV}/portlibs/ppu)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "$ENV{PS3DEV}/portlibs/ppu" CACHE PATH "" FORCE)
+endif()
 
 SET(CMAKE_FIND_ROOT_PATH $ENV{PS3DEV} $ENV{PS3DEV}/ppu $ENV{PS3DEV}/ppu/powerpc64-ps3-elf $ENV{PS3DEV}/portlibs/ppu)
 SET(CMAKE_PREFIX_PATH "$ENV{PS3DEV}/portlibs/ppu")
