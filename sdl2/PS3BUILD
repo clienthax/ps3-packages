@@ -20,6 +20,12 @@ prepare() {
         -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
         -e 's#^libdir=.*#libdir=${prefix}/lib#' \
         -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;
+
+    find ./ -name "sdl2-config.cmake.in" -exec sed -i \
+        -e 's#@prefix@#$ENV{PS3DEV}/portlibs/ppu#g' \
+        -e 's#@exec_prefix@#${prefix}#g' \
+        -e 's#@libdir@#${prefix}/lib#g' \
+        -e 's#@includedir@#${prefix}/include#g' {} \;
 }
 
 build() {
