@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("https://github.com/libsdl-org/libtiff/archive/v${pkgver}.tar.gz")
 sha256sums=('a3faec056a490c62b8749847317521204f8c4d9933cce834e691a74524ec38fe')
-options=('!strip')
 
 prepare() {
     cd "${pkgname}-${pkgver}"

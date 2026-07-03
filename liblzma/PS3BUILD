@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("https://github.com/tukaani-project/xz/releases/download/v${pkgver}/xz-${pkgver}.tar.bz2")
 sha256sums=("33bf69c0d6c698e83a68f77e6c1f465778e418ca0b3d59860d3ab446f4ac99a6")
-options=('!strip')
 
 prepare() {
     cd "xz-${pkgver}"

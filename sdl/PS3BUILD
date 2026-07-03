@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("git+https://github.com/zeldin/SDL_PSL1GHT.git#commit=641a8ca2efa3f775d489daa37878ada1d92c24ab")
 sha256sums=("SKIP")
-options=('!strip')
 
 prepare() {
     cd "SDL_PSL1GHT"

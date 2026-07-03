@@ -12,7 +12,6 @@ makedepends=()
 optdepends=()
 source=("https://github.com/libsdl-org/SDL_mixer/releases/download/release-${pkgver}/SDL2_mixer-${pkgver}.tar.gz")
 sha256sums=("938dff531d00ace2296557a6599abe6f34599e2f34f0a4a08a397e2ccac8b8f7")
-options=('!strip')
 
 prepare() {
     cd "${srcdir}/SDL2_mixer-${pkgver}"

@@ -17,7 +17,6 @@ sha256sums=(
     "2d7598cd2a8c61c023f27c9c7c1aca8bbfd92aadbee2f98b7a6d421eae35c929"
     "SKIP"
 )
-options=('!strip')
 
 #todo update~
 

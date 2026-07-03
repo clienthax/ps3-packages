@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("https://github.com/google/brotli/archive/v${pkgver}.tar.gz")
 sha256sums=('816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec')
-options=('!strip')
 
 prepare() {
     cd "${pkgname}-${pkgver}"

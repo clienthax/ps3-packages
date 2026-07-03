@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("https://github.com/pnggroup/libpng/archive/v${pkgver}.tar.gz")
 sha256sums=('a9d4df463d36a6e5f9c29bd6f4967312d17e996c1854f3511f833924eb1993cf')
-options=('!strip')
 
 prepare() {
     cd "$pkgname-${pkgver}"

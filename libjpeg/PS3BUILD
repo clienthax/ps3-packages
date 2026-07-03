@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${pkgver}.tar.gz")
 sha256sums=('076ef1431f2803a91f07e0f92433d4dcf39bc9113226c4f46ba3d3d54f514c9d')
-options=('!strip')
 
 
 prepare() {

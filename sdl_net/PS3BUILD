@@ -17,7 +17,6 @@ sha256sums=(
     "SKIP"
     "SKIP"
 )
-options=('!strip')
 
 prepare() {
     cd "SDL_net"

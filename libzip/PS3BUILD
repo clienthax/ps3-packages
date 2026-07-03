@@ -12,7 +12,6 @@ makedepends=()
 optdepends=()
 source=("https://libzip.org/download/libzip-1.11.4.tar.xz")
 sha256sums=('8a247f57d1e3e6f6d11413b12a6f28a9d388de110adc0ec608d893180ed7097b')
-options=('!strip')
 
 prepare() {
     cd "$pkgname-$pkgver"

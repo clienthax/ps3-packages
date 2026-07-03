@@ -12,7 +12,6 @@ makedepends=()
 optdepends=()
 source=("git+https://gitlab.xiph.org/xiph/theora.git#commit=28fd5ec77f0ad0e07a371cef1047828116f6bd8a")
 sha256sums=('SKIP')
-options=('!strip')
 
 prepare() {
     cd "${pkgname}"
