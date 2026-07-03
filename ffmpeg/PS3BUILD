@@ -38,6 +38,8 @@ build() {
   --prefix="/portlibs/ppu" \
     --enable-cross-compile \
     --cross-prefix="powerpc64-ps3-elf-" \
+    --pkg-config="powerpc64-ps3-elf-pkg-config" \
+    --pkg-config-flags="--static" \
     --arch=ppc64 \
     --cpu=cell \
     --target-os=none \
@@ -51,6 +53,9 @@ build() {
     --enable-pthreads \
     --disable-runtime-cpudetect \
     --enable-cairo \
+    --enable-zlib \
+    --enable-bzlib \
+    --enable-lzma \
     --extra-cflags="-Dstatic_assert=_Static_assert -std=gnu11"
 
     make --quiet $MAKEFLAGS || { exit 1; }
