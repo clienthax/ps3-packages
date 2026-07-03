@@ -17,11 +17,7 @@ endian = 'big'
 [properties]
 sys_root = '@PS3DEV@/ppu/powerpc64-ps3-elf'
 needs_exe_wrapper = true
-pkg_config_libdir = [
-    '@PS3DEV@/ppu/powerpc64-ps3-elf/lib/pkgconfig',
-    '@PSL1GHT@/ppu/lib/pkgconfig',
-    '@PS3DEV@/portlibs/ppu/lib/pkgconfig'
-]
+pkg_config_libdir = ['@PS3DEV@/ppu/powerpc64-ps3-elf/lib/pkgconfig', '@PSL1GHT@/ppu/lib/pkgconfig', '@PS3DEV@/portlibs/ppu/lib/pkgconfig']
 
 [built-in options]
 c_args = ['-mcpu=cell', '-I@PS3DEV@/ppu/powerpc64-ps3-elf/include', '-I@PSL1GHT@/ppu/include', '-I@PS3DEV@/portlibs/ppu/include']
@@ -29,4 +25,5 @@ cpp_args = ['-mcpu=cell', '-I@PS3DEV@/ppu/powerpc64-ps3-elf/include', '-I@PSL1GH
 c_link_args = ['-L@PS3DEV@/ppu/powerpc64-ps3-elf/lib', '-L@PSL1GHT@/ppu/lib', '-L@PS3DEV@/portlibs/ppu/lib', '-lrt', '-llv2']
 cpp_link_args = ['-L@PS3DEV@/ppu/powerpc64-ps3-elf/lib', '-L@PSL1GHT@/ppu/lib', '-L@PS3DEV@/portlibs/ppu/lib', '-lrt', '-llv2']
 prefix = '@PS3DEV@/portlibs/ppu'
+
 
