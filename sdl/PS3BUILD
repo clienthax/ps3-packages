@@ -34,4 +34,7 @@ build() {
 package() {
     cd "SDL_PSL1GHT"
     make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+    rm "${pkgdir}/portlibs/ppu/lib/libSDL.la"
+    mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 COPYING "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
 }

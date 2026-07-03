@@ -24,14 +24,13 @@ prepare() {
 
 build() {
     cd "SDL_PSL1GHT"
-    
-    ./script.sh
+    ./autogen.sh
+    ./configure --prefix="/portlibs/ppu" --host=powerpc64-ps3-elf --enable-atomic=yes --enable-video-psl1ght=yes --enable-joystick=yes --enable-audio=yes \
+        || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }    
 }
 
 package() {
     cd "SDL_PSL1GHT"
     make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
-    # lazy. - breaks if non default dir..
-    mv $pkgdir/usr/local/ps3dev/portlibs $pkgdir/.
-    rm -rf $pkgdir/usr
 }

@@ -38,7 +38,7 @@ build() {
 
 #    CFLAGS="$(powerpc64-ps3-elf-pkg-config --cflags freetype2)" \
     ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" \
-        --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+        --with-sdl-prefix="$PS3DEV/portlibs/ppu" \
 	--disable-sdltest \
         || { exit 1; }
 
