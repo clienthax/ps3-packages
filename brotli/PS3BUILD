@@ -13,8 +13,18 @@ source=("https://github.com/google/brotli/archive/v${pkgver}.tar.gz")
 sha256sums=('816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec')
 options=('!strip')
 
+prepare() {
+    cd "${pkgname}-${pkgver}"
+
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+}
+
 build() {
-    cd "$pkgname-${pkgver}"
+    cd "${pkgname}-${pkgver}"
     mkdir -p build
     cd build
     cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu \
@@ -24,7 +34,7 @@ build() {
 }
 
 package() {
-    cd "$pkgname-${pkgver}/build"
+    cd "${pkgname}-${pkgver}/build"
     make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
 
     mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
