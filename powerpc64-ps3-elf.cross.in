@@ -1,0 +1,26 @@
+[binaries]
+c = 'powerpc64-ps3-elf-gcc'
+cpp = 'powerpc64-ps3-elf-g++'
+ar = 'powerpc64-ps3-elf-ar'
+ranlib = 'powerpc64-ps3-elf-ranlib'
+strip = 'powerpc64-ps3-elf-strip'
+nm = 'powerpc64-ps3-elf-nm'
+ld = 'powerpc64-ps3-elf-ld'
+
+[host_machine]
+system = 'none'
+cpu_family = 'ppc64'
+cpu = 'ppc64'
+endian = 'big'
+
+[properties]
+sys_root = '@PS3DEV@/ppu/powerpc64-ps3-elf'
+needs_exe_wrapper = true
+
+[built-in options]
+c_args = ['-mcpu=cell', '-I@PS3DEV@/ppu/powerpc64-ps3-elf/include', '-I@PSL1GHT@/ppu/include', '-I@PS3DEV@/portlibs/ppu/include']
+cpp_args = ['-mcpu=cell', '-I@PS3DEV@/ppu/powerpc64-ps3-elf/include', '-I@PSL1GHT@/ppu/include', '-I@PS3DEV@/portlibs/ppu/include']
+c_link_args = ['-L@PS3DEV@/ppu/powerpc64-ps3-elf/lib', '-L@PSL1GHT@/ppu/lib', '-L@PS3DEV@/portlibs/ppu/lib', '-lrt', '-llv2']
+cpp_link_args = ['-L@PS3DEV@/ppu/powerpc64-ps3-elf/lib', '-L@PSL1GHT@/ppu/lib', '-L@PS3DEV@/portlibs/ppu/lib', '-lrt', '-llv2']
+prefix = '@PS3DEV@/portlibs/ppu'
+
