@@ -39,4 +39,6 @@ build() {
 package() {
     cd "SDL_PSL1GHT"
     make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
+    rm "${pkgdir}/portlibs/ppu/lib/libSDL2.la"
+    rm "${pkgdir}/portlibs/ppu/lib/libSDL2main.la"
 }
