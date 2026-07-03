@@ -70,15 +70,19 @@ jobs:
         echo "PSL1GHT=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
         echo "PATH=$PATH:$PWD/ps3dev/bin:$PWD/ps3dev/ppu/bin:$PWD/ps3dev/spu/bin" >> $GITHUB_ENV
 
+    - name: Generate Meson Cross
+      run: |
+        cd ${GITHUB_WORKSPACE}/ps3-packages
+        ./gen_cross_file.py
+        cat powerpc64-ps3-elf.cross
+        cp ${GITHUB_WORKSPACE}/ps3-packages/powerpc64-ps3-elf.cross ${PS3DEV}/etc/ps3-ppu-cross.txt
+
     - name: Bodges
       run: |
         mkdir -p ${PS3DEV}/ps3/share
         mkdir -p ${PS3DEV}/etc
         cp ${GITHUB_WORKSPACE}/ps3-packages/ps3dev.cmake ${PS3DEV}/ps3/share/
         cp ${GITHUB_WORKSPACE}/ps3-packages/powerpc64-ps3-elf-pkg-config ${PS3DEV}/ppu/bin/
-        #cp ${GITHUB_WORKSPACE}/ps3-packages/ps3-ppu-cross.txt ${PS3DEV}/etc/
-        cd ${GITHUB_WORKSPACE}/ps3-packages && ./gen_cross_file.py
-        cp ${GITHUB_WORKSPACE}/ps3-packages/powerpc64-ps3-elf.cross ${PS3DEV}/etc/ps3-ppu-cross.txt
 
     - name: Build ps3-pacman
       run: |
