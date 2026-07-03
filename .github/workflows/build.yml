@@ -78,6 +78,11 @@ jobs:
         mkdir -p ${PS3DEV}/etc
         cp ${GITHUB_WORKSPACE}/ps3-packages/ps3dev.cmake ${PS3DEV}/ps3/share/
         cp ${GITHUB_WORKSPACE}/ps3-packages/powerpc64-ps3-elf-pkg-config ${PS3DEV}/ppu/bin/
+        # The prebuilt toolchain bundles a stale portlibs tree (non-relocatable
+        # .la files, old headers/.pc baked to the ps3dev build runner path).
+        # This repo builds all portlibs itself, so wipe it for a clean slate.
+        rm -rf ${PS3DEV}/portlibs
+        mkdir -p ${PS3DEV}/portlibs/ppu/lib/pkgconfig
 
     - name: Generate Meson Cross
       run: |
