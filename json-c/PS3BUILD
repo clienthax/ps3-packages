@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("git+https://github.com/json-c/json-c.git#commit=41a55cfcedb54d9c1874f2f0eb07b504091d7e37")
 sha256sums=('SKIP')
-options=('!strip')
 
 prepare() {
     cd "${pkgname}"

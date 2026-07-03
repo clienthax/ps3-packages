@@ -7,13 +7,12 @@ url="https://cairographics.org/"
 # todo
 license=('custom') 
 groups=('ps3-libraries')
-depends=('pthread-emb' 'libpng' 'freetype2')
+depends=('pthread-emb' 'libpng' 'freetype2' 'pixman')
 makedepends=()
 optdepends=()
 group=('all')
 source=("https://github.com/sailfishos-mirror/cairo/archive/refs/tags/${pkgver}.tar.gz")
 sha256sums=('2f3e6e665dbbb420809102b71ad7d0f7ce870a0b1bf8b34c073f06aefb511fc6')
-options=('!strip')
 
 prepare() {
     cd "${pkgname}-${pkgver}"

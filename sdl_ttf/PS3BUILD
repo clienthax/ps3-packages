@@ -17,7 +17,6 @@ sha256sums=(
     '7d38704bcc7c34029c2dcb73b2d4857e8ad76341c6e0faed279eb9f743c66c6a'
     "SKIP"
 )
-options=('!strip')
 
 prepare() {
     cd "SDL_ttf-${pkgver}"
@@ -37,8 +36,8 @@ build() {
 
     CFLAGS="$(powerpc64-ps3-elf-pkg-config --cflags freetype2)" \
     ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" \
-	--with-freetype-exec-prefix="$PS3DEV/portlibs/ppu" \
-        --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+	--with-freetype-prefix="$PS3DEV/portlibs/ppu" \
+        --with-sdl-prefix="$PS3DEV/portlibs/ppu" \
 	--without-x \
 	--disable-sdltest \
         || { exit 1; }

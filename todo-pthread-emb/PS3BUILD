@@ -12,7 +12,6 @@ optdepends=()
 provides=()
 source=('git+https://github.com/bucanero/pthread-emb-ps3.git#commit=643171135e8f315e2a1c0bf469de0788f167a055')
 sha256sums=('SKIP')
-options=('!strip')
 
 build() {
     cd "pthread-emb-ps3/platform/psl1ght"

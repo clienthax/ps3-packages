@@ -5,14 +5,13 @@ pkgdesc="MPEG audio decoder library for PSP"
 arch=(any)
 url="https://www.underbit.com/products/mad"
 license=('GPL-2.0-only')
-groups=('psp-libraries')
+groups=('ps3-libraries')
 depends=()
 makedepends=()
 optdepends=()
 makedepends=()
 source=("https://downloads.sourceforge.net/project/mad/libmad/0.15.1b/libmad-0.15.1b.tar.gz")
 sha256sums=("bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690")
-options=('!strip')
 
 prepare() {
     cd "${pkgname}-${pkgver}"

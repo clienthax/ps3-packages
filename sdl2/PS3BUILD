@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("git+https://github.com/shagkur/SDL_PSL1GHT.git#commit=b81fbad4489918f5ed9c9c052238d7a25da9bab9")
 sha256sums=("SKIP")
-options=('!strip')
 
 prepare() {
     cd "SDL_PSL1GHT"
@@ -20,18 +19,25 @@ prepare() {
         -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
         -e 's#^libdir=.*#libdir=${prefix}/lib#' \
         -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;
+
+    find ./ -name "sdl2-config.cmake.in" -exec sed -i \
+        -e 's#@prefix@#$ENV{PS3DEV}/portlibs/ppu#g' \
+        -e 's#@exec_prefix@#${prefix}#g' \
+        -e 's#@libdir@#${prefix}/lib#g' \
+        -e 's#@includedir@#${prefix}/include#g' {} \;
 }
 
 build() {
     cd "SDL_PSL1GHT"
-    
-    ./script.sh
+    ./autogen.sh
+    ./configure --prefix="/portlibs/ppu" --host=powerpc64-ps3-elf --enable-atomic=yes --enable-video-psl1ght=yes --enable-joystick=yes --enable-audio=yes \
+        || { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }    
 }
 
 package() {
     cd "SDL_PSL1GHT"
     make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
-    # lazy. - breaks if non default dir..
-    mv $pkgdir/usr/local/ps3dev/portlibs $pkgdir/.
-    rm -rf $pkgdir/usr
+    rm "${pkgdir}/portlibs/ppu/lib/libSDL2.la"
+    rm "${pkgdir}/portlibs/ppu/lib/libSDL2main.la"
 }

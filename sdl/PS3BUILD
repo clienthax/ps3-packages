@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("git+https://github.com/zeldin/SDL_PSL1GHT.git#commit=641a8ca2efa3f775d489daa37878ada1d92c24ab")
 sha256sums=("SKIP")
-options=('!strip')
 
 prepare() {
     cd "SDL_PSL1GHT"
@@ -21,18 +20,25 @@ prepare() {
         -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
         -e 's#^libdir=.*#libdir=${prefix}/lib#' \
         -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;
+
+    find ./ -name "sdl-config.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${exec_prefix}/lib#' {} \;
 }
 
 build() {
     cd "SDL_PSL1GHT"
-    
-    ./script.sh
+    ./autogen.sh
+    ./configure	--prefix="/portlibs/ppu" --host=powerpc64-ps3-elf --enable-atomic=yes --enable-video-psl1ght=yes --enable-joystick=yes --enable-audio=yes \
+	|| { exit 1; }
+    make --quiet $MAKEFLAGS || { exit 1; }
 }
 
 package() {
     cd "SDL_PSL1GHT"
     make --quiet DESTDIR=$pkgdir $MAKEFLAGS install
-    # lazy.
-    mv $pkgdir/usr/local/ps3dev/portlibs $pkgdir/.
-    rm -rf $pkgdir/usr
+    rm "${pkgdir}/portlibs/ppu/lib/libSDL.la"
+    mkdir -m 755 -p "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
+    install -m 644 COPYING "$pkgdir/portlibs/ppu/share/licenses/$pkgname"
 }

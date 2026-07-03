@@ -17,7 +17,6 @@ sha256sums=(
     "SKIP"
     "SKIP"
 )
-options=('!strip')
 
 prepare() {
     cd "${pkgname}"
@@ -32,13 +31,16 @@ prepare() {
         -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
 }
 
+# TODO recheck modulo sched on gcc update.
 build() {
     cd "${pkgname}"
     mkdir -p build
     cd build
+    printf 'add_compile_options(-fno-modulo-sched)\n' > modulo-sched-fix.cmake
     cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
       -DENABLE_PROGRAMS=OFF \
       -DENABLE_TESTING=OFF \
+      -DCMAKE_PROJECT_INCLUDE="$(pwd)/modulo-sched-fix.cmake" \
       -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
     make --quiet $MAKEFLAGS || { exit 1; }
 }

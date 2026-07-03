@@ -11,7 +11,16 @@ makedepends=()
 optdepends=()
 source=("git+https://gitlab.com/bzip2/bzip2.git#commit=bf5f505d0156ad5c6635d05db06b1bb7593b45b7")
 sha256sums=('SKIP')
-options=('!strip')
+
+prepare() {
+    cd "$pkgname"
+    find ./ -name "*.pc.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^bindir=.*#prefix=${prefix}/bin#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${prefix}/lib#' \
+        -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;    
+}
 
 build() {
     cd "$pkgname"

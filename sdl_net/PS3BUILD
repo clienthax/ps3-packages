@@ -17,7 +17,6 @@ sha256sums=(
     "SKIP"
     "SKIP"
 )
-options=('!strip')
 
 prepare() {
     cd "SDL_net"
@@ -42,7 +41,7 @@ build() {
 
     CFLAGS="$CFLAGS -I$PS3DEV/ppu/include -L$PS3DEV/ppu/lib" \
     ../configure --prefix="/portlibs/ppu" --host="powerpc64-ps3-elf" \
-        --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+        --with-sdl-prefix="$PS3DEV/portlibs/ppu" \
 	--disable-sdltest \
         --disable-shared \
         || { exit 1; }

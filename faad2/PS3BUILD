@@ -11,7 +11,6 @@ makedepends=()
 optdepends=()
 source=("https://github.com/knik0/faad2/archive/refs/tags/${pkgver}.tar.gz")
 sha256sums=('3fcbd305e4abd34768c62050e18ca0986f7d9c5eca343fb98275418013065c0e')
-options=('!strip')
 
 prepare() {
     cd "${pkgname}-${pkgver}"
@@ -29,6 +28,7 @@ build() {
     cd build-ppu
 
     cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE=$PS3DEV/ps3/share/ps3dev.cmake -DCMAKE_INSTALL_PREFIX=/portlibs/ppu -DBUILD_SHARED_LIBS=OFF \
+        -DFAAD_BUILD_CLI=Off \
         -DCMAKE_BUILD_TYPE=Release "${XTRA_OPTS[@]}" .. || { exit 1; }
 
     make --quiet $MAKEFLAGS || { exit 1; }

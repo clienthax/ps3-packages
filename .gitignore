@@ -1,0 +1,23 @@
+# Ignore everything at the root
+/*
+# But look inside top-level directories
+!/*/
+# Ignore everything one level deep...
+/*/*
+
+# ...except the patterns we actually want
+!/*/*.patch
+!/*/PS3BUILD
+!/*/*.make
+!/ps3dev.cmake
+!/get_build_order.py
+!/powerpc64-ps3-elf-pkg-config
+!/ps3-ppu-cross.txt
+!/powerpc64-ps3-elf.cross.in
+!/gen_cross_file.py
+!/.gitignore
+
+# Re-open the path down to build.yml
+!/.github/
+!/.github/workflows/
+!/.github/workflows/build.yml

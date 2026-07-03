@@ -1,0 +1,33 @@
+[binaries]
+c = 'powerpc64-ps3-elf-gcc'
+cpp = 'powerpc64-ps3-elf-g++'
+ar = 'powerpc64-ps3-elf-ar'
+ranlib = 'powerpc64-ps3-elf-ranlib'
+strip = 'powerpc64-ps3-elf-strip'
+nm = 'powerpc64-ps3-elf-nm'
+ld = 'powerpc64-ps3-elf-ld'
+pkg-config = 'powerpc64-ps3-elf-pkg-config'
+
+[host_machine]
+system = 'none'
+cpu_family = 'ppc64'
+cpu = 'ppc64'
+endian = 'big'
+
+[properties]
+# No sys_root: portlibs lives at @PS3DEV@/portlibs/ppu, outside the toolchain
+# sysroot, and the portlibs .pc files already carry absolute paths. Setting
+# sys_root makes meson export PKG_CONFIG_SYSROOT_DIR, which pkg-config then
+# prepends to those absolute -I/-L paths, producing mangled/doubled dirs
+# (e.g. freetype2's include -> .../powerpc64-ps3-elf/usr/local/.../freetype2).
+needs_exe_wrapper = true
+pkg_config_libdir = ['@PS3DEV@/ppu/powerpc64-ps3-elf/lib/pkgconfig', '@PSL1GHT@/ppu/lib/pkgconfig', '@PS3DEV@/portlibs/ppu/lib/pkgconfig']
+
+[built-in options]
+c_args = ['-mcpu=cell', '-I@PS3DEV@/ppu/powerpc64-ps3-elf/include', '-I@PSL1GHT@/ppu/include', '-I@PS3DEV@/portlibs/ppu/include']
+cpp_args = ['-mcpu=cell', '-I@PS3DEV@/ppu/powerpc64-ps3-elf/include', '-I@PSL1GHT@/ppu/include', '-I@PS3DEV@/portlibs/ppu/include']
+c_link_args = ['-L@PS3DEV@/ppu/powerpc64-ps3-elf/lib', '-L@PSL1GHT@/ppu/lib', '-L@PS3DEV@/portlibs/ppu/lib', '-lrt', '-llv2']
+cpp_link_args = ['-L@PS3DEV@/ppu/powerpc64-ps3-elf/lib', '-L@PSL1GHT@/ppu/lib', '-L@PS3DEV@/portlibs/ppu/lib', '-lrt', '-llv2']
+prefix = '@PS3DEV@/portlibs/ppu'
+
+

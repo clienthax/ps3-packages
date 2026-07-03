@@ -1,0 +1,16 @@
+--- pixman/pixman-ppc.c	2025-07-20 17:14:02.000000000 +0100
++++ pixman/pixman-ppc.c	2026-07-03 11:48:19.778821638 +0100
+@@ -47,6 +47,13 @@
+ 
+     return have_vmx;
+ }
++#elif defined (__PPU__)
++
++static pixman_bool_t
++pixman_have_vmx (void)
++{
++    return TRUE;
++}
+ 
+ #elif defined (__OpenBSD__)
+ #include <sys/param.h>
