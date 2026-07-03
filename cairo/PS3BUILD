@@ -7,7 +7,7 @@ url="https://cairographics.org/"
 # todo
 license=('custom') 
 groups=('ps3-libraries')
-depends=('pthread-emb' 'libpng' 'freetype2', 'pixman')
+depends=('pthread-emb' 'libpng' 'freetype2' 'pixman')
 makedepends=()
 optdepends=()
 group=('all')
