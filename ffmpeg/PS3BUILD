@@ -7,7 +7,7 @@ url="https://ffmpeg.org/"
 license=('GPL')
 groups=('ps3-libraries')
 # todo, SO MANY..
-depends=('pthread-emb' 'bzip2' 'liblzma' 'sdl2' 'zlib' 'cairo')
+depends=('pthread-emb' 'bzip2' 'liblzma' 'sdl2' 'zlib')
 makedepends=()
 optdepends=()
 source=("git+https://github.com/FFmpeg/FFmpeg.git#commit=38b88335f99e76ed89ff3c93f877fdefce736c13")
@@ -52,7 +52,6 @@ build() {
     --disable-doc \
     --enable-pthreads \
     --disable-runtime-cpudetect \
-    --enable-cairo \
     --enable-zlib \
     --enable-bzlib \
     --enable-lzma \
