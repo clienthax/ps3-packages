@@ -34,6 +34,7 @@ build() {
       -Dgtk=disabled \
       -Dmmx=disabled \
       -Dsse2=disabled \
+      -Dvmx=disabled \
       -Dwrap_mode=nofallback
     meson compile -C build-ppu
 
