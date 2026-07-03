@@ -124,10 +124,9 @@ jobs:
     if: contains(github.ref,'refs/heads/master')
     needs: [prepare_jobs, build]
     runs-on: ubuntu-latest
-    container: ghcr.io/PS3DEV/ps3sdk:latest
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
     - name: Download artifacts
