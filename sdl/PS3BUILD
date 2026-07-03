@@ -21,6 +21,11 @@ prepare() {
         -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
         -e 's#^libdir=.*#libdir=${prefix}/lib#' \
         -e 's#^includedir=.*#includedir=${prefix}/include#' {} \;
+
+    find ./ -name "sdl-config.in" -exec sed -i \
+        -e 's#^prefix=.*#prefix=${PS3DEV}/portlibs/ppu#' \
+        -e 's#^exec_prefix=.*#exec_prefix=${prefix}#' \
+        -e 's#^libdir=.*#libdir=${exec_prefix}/lib#' {} \;
 }
 
 build() {
