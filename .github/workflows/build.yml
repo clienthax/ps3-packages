@@ -140,7 +140,7 @@ jobs:
     - name: Install Linux requirements
       run: |
         sudo apt-get update
-        sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev meson python3 ninja-build build-ess>
+        sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev meson python3 ninja-build build-essential libarchive-dev libarchive-tools libcurl4-openssl-dev libgpgme-dev
         # mbedtls deps..
         sudo apt-get -y install python3-jsonschema python3-jinja2
 
