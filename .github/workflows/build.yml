@@ -187,7 +187,7 @@ jobs:
         chown -R $(id -nu):$(id -ng) .
         mkdir repo
         cp artifact-*/*.pkg.tar.gz repo/
-        ./make-repo-html.sh
+        ${GITHUB_WORKSPACE}/ps3-packages/make-repo-html.sh
         cd repo
         ${PS3DEV}/share/pacman/bin/repo-add PS3DEV.db.tar.gz *.pkg.tar.gz
         mv PS3DEV.db.tar.gz PS3DEV.db
