@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>${GITHUB_REPOSITORY_OWNER}&#39;s package index</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>${GITHUB_REPOSITORY_OWNER}&#39;s package index</h1>
+        <p>
+            This is the repository of third party libraries for Playstation 3 development that is part of the PS3 SDK called <a href="https://github.com/ps3dev/ps3dev">PS3DEV</a>.<br>
+            The packages which are in the group <b>ps3-libraries</b> come bundled with the SDK.<br>
+            Currently there are <b>${PACKAGE_COUNT}</b> packages in this repository.<br>
+            <br>
+            Packages which are not in the ps3-libraries group can be installed using the following command:
+            <pre># ps3-pacman -Sy package-name</pre>
+            Updating the packages installed can be done using the following command:
+            <pre># ps3-pacman -Syu</pre>
+        </p>
+        <table>
+            <tr><th>Name</th><th>Version</th><th>Description</th><th>Groups</th><th>Last Updated</th></tr>
+            ${INDEX_TABLE_CONTENT}
+        </table>
+        <p>Source on <a href="https://github.com/${GITHUB_REPOSITORY}/">GitHub</a></p>
+    </body>
+</html>

@@ -16,6 +16,10 @@
 !/powerpc64-ps3-elf.cross.in
 !/gen_cross_file.py
 !/.gitignore
+!/make-repo-html.sh
+!/style.css
+!/index.html
+!/package.html
 
 # Re-open the path down to build.yml
 !/.github/
